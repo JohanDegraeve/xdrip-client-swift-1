@@ -3,9 +3,13 @@
 
 <p>Here are the steps we're going to take:</p>
 <ul>
-<li>Update Cartfile dependencies</li> 
-<li>Carthage update</li>
-<li>Add xDrip as a CGM source to Loop in Xcode</li>
+  <li>Update Cartfile dependencies</li> 
+  <li>Carthage update</li>
+  <li>Add xDrip as a CGM source to Loop in Xcode</li>
+  <li>Add the xDrip frameworks</li>
+  <li>Link binaries</li>
+  <li>Build and launch</li>
+  <li>Troubleshoot</li>
 </ul>
 
 <h1>Update Cartfile dependencies</h1>
@@ -26,3 +30,18 @@
 <p>Open up your Loop folder and open the Loop project. In the project manager pane on the lefthand side of your screen, navigate into Loop &gt; Managers &gt; CGMManager.swift.</p>
 <p>At the top of the file, you'll see a bunch of frameworks being imported via the declaration <code>import LoopKit</code>, or <code>import ShareClient</code>. We also want to import something : the xDrip client. Click at the end of the last framework being imported, hit enter, and type <code>import xDripClient</code>.</p>
 <p>A little further down you'll notice the constant <code>allCGMManagers</code> being declared, with the required syntax being <code>CGMManager.Type</code>. Add xDrip to the list by typing : <code>xDripClientManager.self</code>.</p>
+
+<h1>Add the xDrip frameworks</h1>
+<p>Time to use the xDrip frameworks that Carthage went and got for us.</p>
+<p>At the top of the project manager pane you'll see "Loop" with the app icon symbol next to it, under TARGETS. Click on that. Along the top of the screen, right under the name of the project, you'll see a range of tabs listed horizontally, such as "General", "Capabilities", "Resource tags"... Find "Build Phases" and click on it. You'll see a list of options appear. Near the bottom you'll see "Copy Frameworks with Carthage". Click on that.</p>
+<p>Under "Input Files", you'll see a bunch of things that start with <code>$(BUILT_PRODUCTS_DIR)</code>. All of those files are the frameworks that we asked Carthage to get. We're going to add the xDrip client and its UI onto the list, so that Loop can access the files while it's building and running.</p>
+<p>Click on the <code>+</code> and type :</p>
+<p><code>$(BUILT_PRODUCTS_DIR)/xDripClient.framework/xDripClient</code></p>
+<p><code>$(BUILT_PRODUCTS_DIR)/xDripClientUI.framework/xDripClientUI</code></p>
+<p>Now do the same under "Output Files", click on the <code>+</code> and type :</p>
+<p><code>$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClient.framework</code></p>
+<p><code>$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClientUI.framework</code></p>
+
+<h1>Link binaries</h1>
+<h1>Build and launch</h1>
+<h1>Troubleshoot</h1>
