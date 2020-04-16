@@ -24,5 +24,13 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
+	<key>test1</key>
+	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
+	<key>test2</key>
+	<string>${DEVELOPMENT_TEAM}</string>
+	<key>test3</key>
+	<string>$(TeamIdentifierPrefix)</string>
+	<key>test4</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 </dict>
 </plist>
