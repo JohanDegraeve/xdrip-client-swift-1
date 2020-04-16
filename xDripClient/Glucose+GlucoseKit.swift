@@ -30,8 +30,7 @@ extension Glucose: GlucoseValue {
 
 extension Glucose: SensorDisplayable {
     public var isStateValid: Bool {
-        // return glucose >= 39
-        return true
+        return glucose >= 39
     }
 
     public var trendType: GlucoseTrend? {

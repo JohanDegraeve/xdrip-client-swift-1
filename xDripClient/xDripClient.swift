@@ -20,7 +20,7 @@ public class xDripClient {
     
     private let shared: UserDefaults?
     
-    public init(_ group: String? = "group.com.loopkit.xdripclient") {
+    public init(_ group: String? = Bundle(identifier: "com.loopkit.xDripClient")?.appGroupSuiteName) {
         shared = UserDefaults.init(suiteName: group)
     }
     
@@ -85,5 +85,11 @@ public class xDripClient {
         } else {
             throw ClientError.dateError
         }
+    }
+}
+
+extension Bundle {
+    public var appGroupSuiteName: String {
+        return object(forInfoDictionaryKey: "AppGroupIdentifier") as! String
     }
 }
