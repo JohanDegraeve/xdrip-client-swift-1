@@ -24,10 +24,8 @@ public class xDripClient {
         shared = UserDefaults.init(suiteName: group)
         print(group ?? "nil")
         
-        print(Bundle(identifier: "com.loopkit.xDripClient")?.test1 ?? "nil")
-        print(Bundle(identifier: "com.loopkit.xDripClient")?.test2 ?? "nil")
-        print(Bundle(identifier: "com.loopkit.xDripClient")?.test3 ?? "nil")
-        print(Bundle(identifier: "com.loopkit.xDripClient")?.test4 ?? "nil")
+        print(Bundle.main.bundleIdentifier)
+        print(Bundle.main.appGroupSuiteName)
     }
     
     public func fetchLast(_ n: Int, callback: @escaping (ClientError?, [Glucose]?) -> Void) {
@@ -98,20 +96,5 @@ public class xDripClient {
 extension Bundle {
     public var appGroupSuiteName: String {
         return object(forInfoDictionaryKey: "AppGroupIdentifier") as! String
-    }
-    
-    public var test1: String {
-        return object(forInfoDictionaryKey: "test1") as! String
-    }
-    
-    public var test2: String {
-        return object(forInfoDictionaryKey: "test2") as! String
-    }
-    public var test3: String {
-        return object(forInfoDictionaryKey: "test3") as! String
-    }
-    
-    public var test4: String {
-        return object(forInfoDictionaryKey: "test4") as! String
     }
 }
