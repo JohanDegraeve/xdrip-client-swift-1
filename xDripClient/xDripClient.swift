@@ -1,5 +1,5 @@
 //
-//  xDripClient.h
+//  xDripClient.swift
 //  xDripClient
 //
 //  Created by Mark Wilson on 5/7/16.
@@ -22,6 +22,7 @@ public class xDripClient {
     
     public init(_ group: String? = Bundle(identifier: "com.loopkit.xDripClient")?.appGroupSuiteName) {
         shared = UserDefaults.init(suiteName: group)
+        print(group ?? "nil")
     }
     
     public func fetchLast(_ n: Int, callback: @escaping (ClientError?, [Glucose]?) -> Void) {
@@ -31,6 +32,7 @@ public class xDripClient {
     private func fetchLastWithRetries(_ n: Int, remaining: Int, callback: @escaping (ClientError?, [Glucose]?) -> Void) {
         do {
             guard let sharedData = shared?.data(forKey: "latestReadings") else {
+                print(String(data: shared?.data(forKey: "latestReadings") ?? Data(), encoding: .utf8) ?? "nil")
                 throw ClientError.fetchError
             }
         
