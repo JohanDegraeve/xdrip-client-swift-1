@@ -20,12 +20,8 @@ public class xDripClient {
     
     private let shared: UserDefaults?
     
-    public init(_ group: String? = Bundle(identifier: "com.loopkit.xDripClient")?.appGroupSuiteName) {
+    public init(_ group: String? = Bundle.main.appGroupSuiteName) {
         shared = UserDefaults.init(suiteName: group)
-        print(group ?? "nil")
-        
-        print(Bundle.main.bundleIdentifier)
-        print(Bundle.main.appGroupSuiteName)
     }
     
     public func fetchLast(_ n: Int, callback: @escaping (ClientError?, [Glucose]?) -> Void) {
@@ -35,7 +31,6 @@ public class xDripClient {
     private func fetchLastWithRetries(_ n: Int, remaining: Int, callback: @escaping (ClientError?, [Glucose]?) -> Void) {
         do {
             guard let sharedData = shared?.data(forKey: "latestReadings") else {
-                print(String(data: shared?.data(forKey: "latestReadings") ?? Data(), encoding: .utf8) ?? "nil")
                 throw ClientError.fetchError
             }
         
