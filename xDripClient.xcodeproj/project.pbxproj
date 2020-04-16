@@ -872,7 +872,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				APP_GROUP_IDENTIFIER = "group.com.$(TeamIdentifierPrefix)loopkit.xdripclient";
+				APP_GROUP_IDENTIFIER = "group.com.$(DEVELOPMENT_TEAM)loopkit.xdripclient";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -902,7 +902,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				APP_GROUP_IDENTIFIER = "group.com.$(TeamIdentifierPrefix)loopkit.xdripclient";
+				APP_GROUP_IDENTIFIER = "group.com.$(DEVELOPMENT_TEAM)loopkit.xdripclient";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
