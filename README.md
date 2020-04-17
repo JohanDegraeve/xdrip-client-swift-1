@@ -36,12 +36,24 @@
 <p>At the top of the project manager pane you'll see "Loop" with the app icon symbol next to it, under TARGETS. Click on that. Along the top of the screen, right under the name of the project, you'll see a range of tabs listed horizontally, such as "General", "Capabilities", "Resource tags"... Find "Build Phases" and click on it. You'll see a list of options appear. Near the bottom you'll see "Copy Frameworks with Carthage". Click on that.</p>
 <p>Under "Input Files", you'll see a bunch of things that start with <code>$(BUILT_PRODUCTS_DIR)</code>. All of those files are the frameworks that we asked Carthage to get. We're going to add the xDrip client and its UI onto the list, so that Loop can access the files while it's building and running.</p>
 <p>Click on the <code>+</code> and type :</p>
-<p><code>$(BUILT_PRODUCTS_DIR)/xDripClient.framework/xDripClient</code></p>
-<p><code>$(BUILT_PRODUCTS_DIR)/xDripClientUI.framework/xDripClientUI</code></p>
+<p><code>$(BUILT_PRODUCTS_DIR)/xDripClient.framework/xDripClient</code><br><code>$(BUILT_PRODUCTS_DIR)/xDripClientUI.framework/xDripClientUI</code></p>
 <p>Now do the same under "Output Files", click on the <code>+</code> and type :</p>
-<p><code>$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClient.framework</code></p>
-<p><code>$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClientUI.framework</code></p>
+<p><code>$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClient.framework</code><br>
+<code>$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripClientUI.framework</code></p>
 
 <h1>Link binaries</h1>
+<p>We've added a reference into the CGM manager, added a reference to the frameworks, now all we have left is to link the files themselves into Loop.</p>
+<p>Under that same "Build Phases" tab you'll also see "Link Binary With Libraries". Click on that, and scroll down to the <code>+</code> button. You'll be asked to select the files. We're looking for that same <code>xDripClient.framework</code> and <code>xDripClientUI.framework</code> we just referenced in the last step.</p>
+<p>Click <code>Add other...</code> and navigate into your Loop folder. Go into Carthage &gt; Build &gt; iOS and scroll all the way down until you find the <code>xDripClient.framework</code> and the <code>xDripClientUI.framework</code>. Select the <code>.framework</code>, not the <code>.framework.dSYM</code>. We want the one whose icon kind of looks like a Lego.</p>
+
 <h1>Build and launch</h1>
+<p>Yes, <em>finally</em> build and launch! Assign all your targets, select your phone in the active scheme, make sure your screen is left on, and hit play.</p>
+
 <h1>Troubleshoot</h1>
+<p>Loop not getting xDrip data? Try some of these fixes.</p>
+<ul>
+  <li>Make sure Loop and xDrip are using the same App Group it should be something like this : group.com.YOUR_TEAM_ID.loopkit.LoopGroup</li>
+  <li>Make sure xDrip is calibrated and is recieving bloodsugar readings.</li>
+  <li>Make sure both Loop and xDrip are still running in the background else they won't be able to process data</li>
+</ul>
+<p>I am aware most of these fixed require a technical background. So, if you are still not able to fix this issue, feel free to contact me.
