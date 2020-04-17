@@ -56,4 +56,4 @@
   <li>Make sure xDrip is calibrated and is recieving bloodsugar readings.</li>
   <li>Make sure both Loop and xDrip are still running in the background else they won't be able to process data</li>
 </ul>
-<p>I am aware most of these fixed require a technical background. So, if you are still not able to fix this issue, feel free to contact me.
+<p>I am aware most of these fixes require a technical background. So, if you are still not able to fix this issue, feel free to contact me.
