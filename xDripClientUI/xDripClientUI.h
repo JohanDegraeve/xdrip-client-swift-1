@@ -2,11 +2,11 @@
 //  xDripClientUI.h
 //  xDripClientUI
 //
-//  Created by Nathan Racklyeft on 7/29/18.
-//  Copyright © 2018 Mark Wilson. All rights reserved.
+//  Created by Julian Groen on 15/03/2022.
+//  Copyright © 2022 Julian Groen. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for xDripClientUI.
 FOUNDATION_EXPORT double xDripClientUIVersionNumber;

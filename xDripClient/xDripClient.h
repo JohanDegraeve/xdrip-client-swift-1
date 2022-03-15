@@ -2,11 +2,11 @@
 //  xDripClient.h
 //  xDripClient
 //
-//  Created by Nathan Racklyeft on 5/8/16.
-//  Copyright © 2016 Mark Wilson. All rights reserved.
+//  Created by Julian Groen on 14/03/2022.
+//  Copyright © 2022 Julian Groen. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for xDripClient.
 FOUNDATION_EXPORT double xDripClientVersionNumber;
