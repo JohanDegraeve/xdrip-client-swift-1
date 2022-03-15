@@ -14,7 +14,7 @@ cd LoopWorkspace
 
 * Add xDripClient submodule
 ```
-git submodule add -b master https://github.com/julian-groen/xdrip-client-swift.git xDripClient
+git submodule add -b master https://github.com/julian-groen/xdrip-client-swift.git xdrip-client-swift
 ```
 
 ## In Xcode, add xDripClient project into LoopWorkspace
