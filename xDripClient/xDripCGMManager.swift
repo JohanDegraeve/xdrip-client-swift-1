@@ -84,7 +84,7 @@ public class xDripCGMManager: CGMManager {
         self.init()
     }
 
-    public func fetchNewDataIfNeeded(_ completion: @escaping (CGMReadingResult) -> Void) {
+    public func fetchNewDataIfNeeded() {
         
         // check if bluetoothTransmitter is still valid - used for heartbeating
         checkCGMBluetoothTransmitter()
@@ -117,6 +117,11 @@ public class xDripCGMManager: CGMManager {
                 self.latestReading = readings.max(by: { $0.startDate < $1.startDate })
             })
         }
+
+    }
+    
+    public func fetchNewDataIfNeeded(_ completion: @escaping (CGMReadingResult) -> Void) {
+        fetchNewDataIfNeeded()
     }
     
     public var debugDescription: String {
@@ -153,7 +158,7 @@ public class xDripCGMManager: CGMManager {
 
                 // a new cgm transmitter has been setup in xDrip4iOS
                 // we will connect to the same transmitter here so it can be used as heartbeat
-                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive)
+                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onWakeUp: fetchNewDataIfNeeded)
                 
                 return newBluetoothTransmitter
 

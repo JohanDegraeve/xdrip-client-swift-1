@@ -34,19 +34,24 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     /// for use in trace
     private let categoryBlueToothTransmitter =        "BlueToothTransmitter          "
     
+    private let onWakeUp: () -> ()
+    
     // MARK: - Initialization
     
     /// - parameters:
     ///     -  deviceAddress : the bluetooth Mac address
     ///     - one serviceCBUUID: as string, this is the service to be discovered
     ///     - CBUUID_Receive: receive characteristic uuid as string, to which subscribe should be done
-    init(deviceAddress: String, servicesCBUUID: String, CBUUID_Receive:String) {
+    ///     - onWakeUp : function to call when app wakes up
+    init(deviceAddress: String, servicesCBUUID: String, CBUUID_Receive:String, onWakeUp: @escaping () -> ()) {
         
         self.servicesCBUUIDs = [CBUUID(string: servicesCBUUID)]
 
         self.CBUUID_ReceiveCharacteristic = CBUUID_Receive
         
         self.deviceAddress = deviceAddress
+        
+        self.onWakeUp = onWakeUp
         
         let cBCentralManagerOptionRestoreIdentifierKeyToUse = "Loop-" + deviceAddress
         
@@ -375,6 +380,9 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 
         trace("didUpdateValueFor for peripheral with name %{public}@, no further processing", category: categoryBlueToothTransmitter,  peripheral.name ?? "'unknown'")
+        
+        // call back, to onWakeUp, will trigger reading sharedUserdefaults to check for new readings
+        onWakeUp()
         
     }
     
