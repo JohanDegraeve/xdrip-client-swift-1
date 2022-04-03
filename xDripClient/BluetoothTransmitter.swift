@@ -25,9 +25,6 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     /// the receive Characteristic
     private var receiveCharacteristic:CBCharacteristic?
     
-    /// used in BluetoothTransmitter class, eg if after calling discoverServices new method is called and time is exceed, then cancel connection
-    private let maxTimeToWaitForPeripheralResponse = 5.0
-    
     /// peripheral, gets value during connect
     private var peripheral: CBPeripheral?
     
