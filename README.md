@@ -1,6 +1,3 @@
-This guide will help you integrating JohanDegraeve's xDrip4iOS aka https://github.com/JohanDegraeve/xdripswift into Loop.
-
-PLEASE NOTE: the current project requires LoopWorkspace DEV. You *must* use the workspace to build this.
 
 ## Start with a clean LoopWorkspace based on dev
 
