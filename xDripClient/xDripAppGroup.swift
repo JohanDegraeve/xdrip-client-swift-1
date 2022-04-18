@@ -17,18 +17,21 @@ public class xDripAppGroup {
         case data(reason: String)
     }
 
-    private let sharedUserDefaults: UserDefaults?
+    public let sharedUserDefaults: UserDefaults?
     
     public var latestReadings: AnyPublisher<[xDripReading], Swift.Error> {
         return sharedUserDefaults.publisher.retry(2).tryMap { try self.fetchLatestReadings($0) }
             .map { $0.filter { $0.isStateValid } }.eraseToAnyPublisher()
     }
     
+    /// key for shared userdefaults
+    public static let keyForcgmTransmitterDeviceAddress = "cgmTransmitterDeviceAddress"
+    
     /// the mac address of the cgm to which xDrip4iOS is connecting. Nil if none defined
     /// - set by xdrip4ios. xDripClient will need to read it regularly to check if it has changed
     public var cgmTransmitterDeviceAddress: String? {
         
-        if let cGMTransmitterAddress = sharedUserDefaults?.string(forKey: "cgmTransmitterDeviceAddress") {
+        if let cGMTransmitterAddress = sharedUserDefaults?.string(forKey: xDripAppGroup.keyForcgmTransmitterDeviceAddress) {
             return cGMTransmitterAddress
         } else {
             return nil

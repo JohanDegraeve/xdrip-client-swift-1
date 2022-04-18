@@ -10,6 +10,8 @@ import SwiftUI
 import LoopKit
 import LoopKitUI
 import HealthKit
+import xDripClient
+import CoreBluetooth
 
 
 struct xDripStatusView<Model>: View where Model: xDripStatusModel {
@@ -21,9 +23,17 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @State var showingDeleteConfirmation = false
     
+    @AppStorage(UserDefaults.Key.useCGMAsHeartbeat.rawValue) private var useCGMAsHeartbeat: Bool = false
+
+    @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
+    
+    /// for some reason the TextEditor that shows the heartBeatState doesn't immediately use multiline. By removing and re-adding it, multiline is used. A trick to force multiline, is to set showHeartBeatText to false as soon as the View is shown, and immediately back to true. Then multiline is used
+    @State var showHeartBeatText = true
+    
     var body: some View {
         List {
             overviewSection
+            heartBeatSection
             latestReadingSection
             deletionSection
         }
@@ -69,6 +79,34 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
                 value: viewModel.latestReading?.trendType?.localizedDescription
             )
         }
+    }
+    
+    var heartBeatSection: some View {
+        
+        Section(header: SectionHeader(label: LocalizedString("Heartbeat", comment: "Section title for heartbeat info"))) {
+            
+            Toggle(isOn: $useCGMAsHeartbeat) {
+                VStack(alignment: .leading) {
+                    Text("Use CGM as heartbeat", comment: "The title text for the cgm heartbeat enabled switch cell")
+                        .padding(.vertical, 3)
+                }
+            }
+            if useCGMAsHeartbeat && showHeartBeatText {
+                VStack(alignment: .leading) {
+                    TextEditor(text: $heartBeatState)
+                        .multilineTextAlignment(.leading)
+                        .disabled(true)
+                        .lineLimit(nil)
+                        
+                }
+                    
+            }
+
+        }
+        .onAppear(perform: {
+            showHeartBeatText = false;
+            showHeartBeatText = true
+        })
     }
     
     var deletionSection: some View {

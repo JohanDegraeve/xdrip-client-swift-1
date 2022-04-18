@@ -26,12 +26,16 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var receiveCharacteristic:CBCharacteristic?
     
     /// peripheral, gets value during connect
-    private var peripheral: CBPeripheral?
+    private(set) var peripheral: CBPeripheral?
     
     /// for use in trace
     private let categoryBlueToothTransmitter =        "BlueToothTransmitter          "
     
+    /// to be called when data is received, this is the actual heartbeat. It will wake up the app, ie bring it from status suspended to active
     private let onWakeUp: () -> ()
+    
+    /// to be called whenever status change important for UI. In fact it can be called whenever there's in interaction with the CGM. Important is that xDripCGMManager gets the opportunity to change UserDefaults key heartBeatState when necessary
+    private let onHeartBeatStatusChange: () -> ()
     
     // MARK: - Initialization
     
@@ -39,8 +43,9 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     ///     -  deviceAddress : the bluetooth Mac address
     ///     - one serviceCBUUID: as string, this is the service to be discovered
     ///     - CBUUID_Receive: receive characteristic uuid as string, to which subscribe should be done
+    ///     - onHeartBeatStatusChange : function to call when heartBeat related status changes. This is just to be able to change the UI. Eg when status goes from   scanning to  connected
     ///     - onWakeUp : function to call when app wakes up
-    init(deviceAddress: String, servicesCBUUID: String, CBUUID_Receive:String, onWakeUp: @escaping () -> ()) {
+    init(deviceAddress: String, servicesCBUUID: String, CBUUID_Receive:String, onHeartBeatStatusChange: @escaping () -> (), onWakeUp: @escaping () -> ()) {
         
         self.servicesCBUUIDs = [CBUUID(string: servicesCBUUID)]
 
@@ -50,10 +55,12 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         
         self.onWakeUp = onWakeUp
         
+        self.onHeartBeatStatusChange = onHeartBeatStatusChange
+        
         let cBCentralManagerOptionRestoreIdentifierKeyToUse = "Loop-" + deviceAddress
         
         super.init()
-
+        
         trace("in initialize, creating centralManager for peripheral with address %{public}@", category: categoryBlueToothTransmitter, deviceAddress)
         
         centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: cBCentralManagerOptionRestoreIdentifierKeyToUse])
@@ -156,6 +163,9 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         
         self.peripheral = peripheral
         
+        // will change info in UI
+        onHeartBeatStatusChange()
+        
         peripheral.delegate = self
         
         if peripheral.state == .disconnected {
@@ -190,6 +200,9 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 if peripheralArr.count > 0 {
                     
                     peripheral = peripheralArr[0]
+                    
+                    // peripheral is assigned a value, heartbeat status text in UI must change
+                    onHeartBeatStatusChange()
                     
                     if let peripheral = peripheral {
                         
@@ -277,7 +290,7 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         
         trace("in centralManagerDidUpdateState, for peripheral with name %{public}@, new state is %{public}@", category: categoryBlueToothTransmitter, peripheral?.name ?? "'unknown'", "\(central.state.toString())")
         
-        /// in case status changed to powered on and if device address known then try  to retrieveperipherals
+        /// in case status changed to powered on and if device address known then try to retrieveperipherals
         if central.state == .poweredOn {
             
                 /// try to connect to device to which connection was successfully done previously, this attempt is done by callling retrievePeripherals(central)
@@ -395,6 +408,5 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
 
 }
-
 
 

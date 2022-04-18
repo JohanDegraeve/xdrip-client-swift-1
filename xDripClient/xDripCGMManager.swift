@@ -12,7 +12,7 @@ import HealthKit
 import Combine
 
 
-public class xDripCGMManager: CGMManager {
+public class xDripCGMManager: NSObject, CGMManager {
     
     public var managerIdentifier: String = "xDripClient"
     
@@ -73,10 +73,23 @@ public class xDripCGMManager: CGMManager {
     /// for use in trace
     private let categoryxDripCGMManager      =        "xDripCGMManager               "
 
-    public init() {
+    public override init() {
+        
+        // call super.init
+        super.init()
+        
+        // add observer for useCGMAsHeartbeat
+        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.useCGMAsHeartbeat.rawValue, options: .new, context: nil)
+        
+        // add observer for shared userdefaults key cgmTransmitterDeviceAddress
+        sharedUserDefaults.sharedUserDefaults?.addObserver(self, forKeyPath: xDripAppGroup.keyForcgmTransmitterDeviceAddress, context: nil)
         
         // see if bluetoothTransmitter needs to be instantiated
+        // if return value nil, then bluetoothTransmitter will be set to nil, means als if any connection would already be existing, then it will be disconnected
         bluetoothTransmitter = setupBluetoothTransmitter()
+        
+        // set heartbeat state text in userdefaults, this is used in the UI
+        setHeartbeatStateText()
         
     }
     
@@ -124,7 +137,7 @@ public class xDripCGMManager: CGMManager {
         fetchNewDataIfNeeded()
     }
     
-    public var debugDescription: String {
+    public override var debugDescription: String {
         return [
             "## xDripCGMManager",
             "latestReading: \(String(describing: latestReading))",
@@ -132,6 +145,37 @@ public class xDripCGMManager: CGMManager {
         ].joined(separator: "\n")
     }
     
+    // override to observe useCGMAsHeartbeat
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if let keyPath = keyPath {
+            
+            if let keyPathEnum = UserDefaults.Key(rawValue: keyPath) {
+                
+                switch keyPathEnum {
+                    
+                case UserDefaults.Key.useCGMAsHeartbeat :
+                    bluetoothTransmitter = setupBluetoothTransmitter()
+                    
+                    setHeartbeatStateText()
+                    
+                default:
+                    break
+                }
+            } else {
+                
+                if keyPath == xDripAppGroup.keyForcgmTransmitterDeviceAddress {
+                    
+                    checkCGMBluetoothTransmitter()
+                    
+                    setHeartbeatStateText()
+                    
+                }
+                
+            }
+        }
+    }
+
     /// check if a new bluetoothTransmitter needs to be assigned and if yes, assign it
     private func checkCGMBluetoothTransmitter() {
         
@@ -142,23 +186,25 @@ public class xDripCGMManager: CGMManager {
             
             // assign local copy of cgmTransmitterDeviceAddress to the value stored in sharedUserDefaults (possibly nil value)
             UserDefaults.standard.cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress
+            
+            setHeartbeatStateText()
 
         }
         
     }
     
-    /// if sharedUserDefaults.cgmTransmitterDeviceAddress  then create new BluetoothTransmitter
+    /// if UserDefaults.standard.useCGMAsHeartbeat is true and sharedUserDefaults.cgmTransmitterDeviceAddress  then create new BluetoothTransmitter
     private func setupBluetoothTransmitter() -> BluetoothTransmitter? {
         
         // if sharedUserDefaults.cgmTransmitterDeviceAddress is not nil then, create a new bluetoothTranmsitter instance
-        if let cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress {
+        if UserDefaults.standard.useCGMAsHeartbeat, let cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress {
             
             // unwrap cgmTransmitter_CBUUID_Service and cgmTransmitter_CBUUID_Receive
             if let cgmTransmitter_CBUUID_Service = sharedUserDefaults.cgmTransmitter_CBUUID_Service, let cgmTransmitter_CBUUID_Receive = sharedUserDefaults.cgmTransmitter_CBUUID_Receive {
 
                 // a new cgm transmitter has been setup in xDrip4iOS
                 // we will connect to the same transmitter here so it can be used as heartbeat
-                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onWakeUp: fetchNewDataIfNeeded)
+                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onHeartBeatStatusChange: setHeartbeatStateText, onWakeUp: fetchNewDataIfNeeded)
                 
                 return newBluetoothTransmitter
 
@@ -176,8 +222,48 @@ public class xDripCGMManager: CGMManager {
 
     }
     
-}
+    /// will set text in UserDefaults heartBeatState depending on BluetoothTransmitter status, this is then used in UI
+    private func setHeartbeatStateText() {
+        
+        let scanning = LocalizedString("Scanning for CGM. Force Close xDrip4iOS. Keep Loop running in the foreground (prevent phone lock). This text will change as soon as a first connection is made. ", comment: "This is when Loop did not yet make a first connection to the CGM. It is scanning. Need to make sure that no other app (like xDrip4iOS) is connected to the CGM")
+        
+        let firstConnectionMade = LocalizedString("Did connect to CGM. You can now run both xDrip4iOS and Loop. The CGM will be used as heartbeat for Loop.", comment: "Did connect to CGM. Even though it's not connected now, this state remains valid. The CGM will be used as heartbeat for Loop.")
+        
+        let cgmUnknown = LocalizedString("You first need to have a made a successful connection between xDrip4iOS and the CGM. Force close Loop, open xDrip4iOS and make sure it's connected. Once done, force close xDrip4iOS (do not disconnect but force close the app), open Loop and come back to here", comment: "There hasn't been a connectin to xDrip4iOS to the CGM. First need to have a made a successful connection between xDrip4iOS and the CGM. Force close Loop, open xDrip4iOS and make sure it's connected. Once done, force close xDrip4iOS, open Loop and come back to here")
+        
+        // this is for example in case user has selected not to use the CGM as heartbeat. In that case the UI should not even show this text. Meaning normally it should never be shown
+        let notapplicable = "N/A"
+        
+        // in case user has selected not to use cgm as heartbeat
+        if !UserDefaults.standard.useCGMAsHeartbeat {
+            UserDefaults.standard.heartBeatState = notapplicable
+            return
+        }
+        
+        // in case xDrip4iOS did not make a first connection to the CGM (or explicitly disconnected from the CGM)
+        if UserDefaults.standard.cgmTransmitterDeviceAddress == nil {
+            UserDefaults.standard.heartBeatState = cgmUnknown
+            return
+        }
+        
+        // now there should be a bluetoothTransmitter, if not there's a coding error
+        guard let bluetoothTransmitter = bluetoothTransmitter else {
+            UserDefaults.standard.heartBeatState = notapplicable
+            return
+        }
 
+        // if peripheral in bluetoothTransmitter is still nil, then it means Loop is still scanning for the CGM, it didn't make a first connection yet
+        if bluetoothTransmitter.peripheral == nil {
+            UserDefaults.standard.heartBeatState = scanning
+            return
+        }
+        
+        // in all other cases, the state should be ok
+        UserDefaults.standard.heartBeatState = firstConnectionMade
+        
+    }
+    
+}
 // MARK: - AlertResponder implementation
 extension xDripCGMManager {
     public func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier, completion: @escaping (Error?) -> Void) {
@@ -191,22 +277,59 @@ extension xDripCGMManager {
     public func getSounds() -> [Alert.Sound] { return [] }
 }
 
-// add cgmTransmitterDeviceAddress to UserDefaults
-// this is the local stored (ie not shared with xDrip4iOS) copy of the cgm (bluetooth) device address
+// MARK: - UserDefaults
+
 extension UserDefaults {
     
-    private enum Key: String {
+    public enum Key: String {
+        
         /// used as local copy of cgmTransmitterDeviceAddress, will be compared regularly against value in shared UserDefaults
+        ///
+        /// this is the local stored (ie not shared with xDrip4iOS) copy of the cgm (bluetooth) device address
         case cgmTransmitterDeviceAddress = "com.loopkit.Loop.cgmTransmitterDeviceAddress"
+        
+        /// did user ask heartbeat from CGM that is used by xDrip4iOS, default : true
+        case useCGMAsHeartbeat = "useCGMAsHeartbeat"
+        
+        /// status of Loop vs CGM, see enum HeartBeatState for description
+        case heartBeatState = "heartBeatState"
+        
     }
 
-    public var cgmTransmitterDeviceAddress: String? {
+    /// used as local copy of cgmTransmitterDeviceAddress, will be compared regularly against value in shared UserDefaults
+    var cgmTransmitterDeviceAddress: String? {
         get {
             return string(forKey: Key.cgmTransmitterDeviceAddress.rawValue)
         }
         set {
             set(newValue, forKey: Key.cgmTransmitterDeviceAddress.rawValue)
         }
+    }
+    
+    /// did user ask heartbeat from CGM that is used by xDrip4iOS, default : true
+    @objc dynamic var useCGMAsHeartbeat: Bool {
+        
+        // default value for bool in userdefaults is false, by default we want to use heartbeat
+        get {
+            return bool(forKey: Key.useCGMAsHeartbeat.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.useCGMAsHeartbeat.rawValue)
+        }
+        
+    }
+    
+    /// status of Loop vs CGM, see enum HeartBeatState for description
+    @objc dynamic var heartBeatState: String {
+        
+        // default value for bool in userdefaults is false, by default we want to use heartbeat
+        get {
+            return string(forKey: Key.heartBeatState.rawValue) ?? ""
+        }
+        set {
+            set(newValue, forKey: Key.heartBeatState.rawValue)
+        }
+        
     }
     
 }
