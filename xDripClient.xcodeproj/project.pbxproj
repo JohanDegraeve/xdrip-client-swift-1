@@ -40,6 +40,11 @@
 		847530F626ED65DD009FD801 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 847530F426ED65DD009FD801 /* LoopKit.framework */; };
 		847530F826ED65DD009FD801 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 847530F526ED65DD009FD801 /* LoopKitUI.framework */; };
 		C1D27A1527908DC600C41EBA /* xDripClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84752E8226ED0FFE009FD801 /* xDripClient.framework */; };
+		F87C2BB827E675810053D946 /* BluetoothTransmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BB727E675810053D946 /* BluetoothTransmitter.swift */; };
+		F87C2BBA27E68CAA0053D946 /* Trace.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BB927E68CAA0053D946 /* Trace.swift */; };
+		F87C2BBD27E68F9D0053D946 /* StringProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BBC27E68F9D0053D946 /* StringProtocol.swift */; };
+		F87C2BBF27E7DEE70053D946 /* CBManagerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BBE27E7DEE70053D946 /* CBManagerState.swift */; };
+		F87C2BC127EA74260053D946 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BC027EA74260053D946 /* URL.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +120,11 @@
 		A91B2DEB276E1E5E001B0E95 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C187C197279086A8006E3557 /* xDripClientPlugin.loopplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = xDripClientPlugin.loopplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		C187C1A427908B1C006E3557 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F87C2BB727E675810053D946 /* BluetoothTransmitter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothTransmitter.swift; sourceTree = "<group>"; };
+		F87C2BB927E68CAA0053D946 /* Trace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Trace.swift; sourceTree = "<group>"; };
+		F87C2BBC27E68F9D0053D946 /* StringProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringProtocol.swift; sourceTree = "<group>"; };
+		F87C2BBE27E7DEE70053D946 /* CBManagerState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CBManagerState.swift; sourceTree = "<group>"; };
+		F87C2BC027EA74260053D946 /* URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URL.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +185,7 @@
 		84752E7826ED0FFE009FD801 = {
 			isa = PBXGroup;
 			children = (
+				F87C2BBB27E68F330053D946 /* Extensions */,
 				A91B2DEB276E1E5E001B0E95 /* README.md */,
 				84752EE926ED1402009FD801 /* Common */,
 				84752E8426ED0FFE009FD801 /* xDripClient */,
@@ -199,6 +210,8 @@
 		84752E8426ED0FFE009FD801 /* xDripClient */ = {
 			isa = PBXGroup;
 			children = (
+				F87C2BB927E68CAA0053D946 /* Trace.swift */,
+				F87C2BB727E675810053D946 /* BluetoothTransmitter.swift */,
 				0AA1BFF527E0BCE00098B986 /* xDripReading.swift */,
 				0AA1BFC727E02DC40098B986 /* xDripCGMManager.swift */,
 				0A53988227E0CCB700077BAF /* xDripAppGroup.swift */,
@@ -238,6 +251,16 @@
 				C187C1A427908B1C006E3557 /* Info.plist */,
 			);
 			path = xDripClientPlugin;
+			sourceTree = "<group>";
+		};
+		F87C2BBB27E68F330053D946 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F87C2BC027EA74260053D946 /* URL.swift */,
+				F87C2BBE27E7DEE70053D946 /* CBManagerState.swift */,
+				F87C2BBC27E68F9D0053D946 /* StringProtocol.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -440,13 +463,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F87C2BB827E675810053D946 /* BluetoothTransmitter.swift in Sources */,
 				0AA1BFEF27E0357E0098B986 /* OSLog.swift in Sources */,
 				0AA1BFC827E02DC40098B986 /* xDripCGMManager.swift in Sources */,
 				0AA1BFF827E0BD9B0098B986 /* HKUnit.swift in Sources */,
+				F87C2BBF27E7DEE70053D946 /* CBManagerState.swift in Sources */,
+				F87C2BBD27E68F9D0053D946 /* StringProtocol.swift in Sources */,
 				0A53988527E0ECE100077BAF /* LocalizedString.swift in Sources */,
+				F87C2BBA27E68CAA0053D946 /* Trace.swift in Sources */,
 				0A53987C27E0CA0100077BAF /* Framework.swift in Sources */,
 				0AA1BFF627E0BCE00098B986 /* xDripReading.swift in Sources */,
 				0A53988327E0CCB700077BAF /* xDripAppGroup.swift in Sources */,
+				F87C2BC127EA74260053D946 /* URL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

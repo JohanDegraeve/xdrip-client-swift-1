@@ -17,11 +17,48 @@ public class xDripAppGroup {
         case data(reason: String)
     }
 
-    private let sharedUserDefaults: UserDefaults?
+    public let sharedUserDefaults: UserDefaults?
     
     public var latestReadings: AnyPublisher<[xDripReading], Swift.Error> {
         return sharedUserDefaults.publisher.retry(2).tryMap { try self.fetchLatestReadings($0) }
             .map { $0.filter { $0.isStateValid } }.eraseToAnyPublisher()
+    }
+    
+    /// key for shared userdefaults
+    public static let keyForcgmTransmitterDeviceAddress = "cgmTransmitterDeviceAddress"
+    
+    /// the mac address of the cgm to which xDrip4iOS is connecting. Nil if none defined
+    /// - set by xdrip4ios. xDripClient will need to read it regularly to check if it has changed
+    public var cgmTransmitterDeviceAddress: String? {
+        
+        if let cGMTransmitterAddress = sharedUserDefaults?.string(forKey: xDripAppGroup.keyForcgmTransmitterDeviceAddress) {
+            return cGMTransmitterAddress
+        } else {
+            return nil
+        }
+        
+    }
+    
+    /// the service uuid to discover, see description cgmTransmitterDeviceAddress
+    public var cgmTransmitter_CBUUID_Service: String? {
+        
+        if let cgmTransmitter_CBUUID_Service = sharedUserDefaults?.string(forKey: "cgmTransmitter_CBUUID_Service") {
+            return cgmTransmitter_CBUUID_Service
+        } else {
+            return nil
+        }
+        
+    }
+    
+    /// the receive characteristic to subscribe too,  see description cgmTransmitterDeviceAddress
+    public var cgmTransmitter_CBUUID_Receive: String? {
+        
+        if let cgmTransmitter_CBUUID_Receive = sharedUserDefaults?.string(forKey: "cgmTransmitter_CBUUID_Receive") {
+            return cgmTransmitter_CBUUID_Receive
+        } else {
+            return nil
+        }
+        
     }
     
     public init(_ group: String? = Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String) {
