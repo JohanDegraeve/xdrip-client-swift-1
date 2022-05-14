@@ -29,7 +29,7 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private(set) var peripheral: CBPeripheral?
     
     /// for use in trace
-    private let categoryBlueToothTransmitter =        "BlueToothTransmitter          "
+    private let categoryBlueToothTransmitter =        "xDripClient.BlueToothTransmitter"
     
     /// to be called when data is received, this is the actual heartbeat. It will wake up the app, ie bring it from status suspended to active
     private let onWakeUp: () -> ()

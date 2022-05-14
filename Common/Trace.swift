@@ -192,6 +192,10 @@ fileprivate func rotateTraceFiles() {
 
 public class Trace {
     
+    public init() {
+        
+    }
+    
     /// returns tuple, first type is an array of Data, each element is a tracefile converted to Data, second type is String, each element is the name of the tracefile
     public static func getTraceFilesInData() -> ([Data], [String]) {
         
@@ -220,6 +224,11 @@ public class Trace {
         
         return (traceFilesInData, traceFileNames)
         
+    }
+    
+    /// to call Trace function from other modules. Code in the xDripClient module can directly call trace without using the Class Trace
+    public func callTrace(_ message: StaticString, category: String, _ args: CVarArg...) {
+        trace(message, category: category, args)
     }
     
 }

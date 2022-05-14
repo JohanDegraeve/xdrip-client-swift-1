@@ -71,7 +71,7 @@ public class xDripCGMManager: NSObject, CGMManager {
     private var bluetoothTransmitter: BluetoothTransmitter?
     
     /// for use in trace
-    private let categoryxDripCGMManager      =        "xDripCGMManager               "
+    private let categoryxDripCGMManager      =        "xDripClient.xDripCGMManager"
 
     public override init() {
         
