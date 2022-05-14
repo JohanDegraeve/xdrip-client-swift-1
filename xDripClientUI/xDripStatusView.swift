@@ -5,6 +5,7 @@
 //  Created by Julian Groen on 15/03/2022.
 //  Copyright © 2022 Julian Groen. All rights reserved.
 //
+// Adapted by Johan Degraeve
 
 import SwiftUI
 import LoopKit
@@ -12,7 +13,7 @@ import LoopKitUI
 import HealthKit
 import xDripClient
 import CoreBluetooth
-
+import MessageUI
 
 struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
@@ -22,6 +23,10 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     @Environment(\.guidanceColors) var guidanceColors
     
     @State var showingDeleteConfirmation = false
+     
+    @State private var showEmailNotConfiguredWarning = false
+    @State private var result: Result<MFMailComposeResult, Error>? = nil
+    @State private var isShowingMailView = false
     
     @AppStorage(UserDefaults.Key.useCGMAsHeartbeat.rawValue) private var useCGMAsHeartbeat: Bool = false
 
@@ -35,6 +40,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             overviewSection
             heartBeatSection
             latestReadingSection
+            sendTraceFileSection
             deletionSection
         }
         .insetGroupedListStyle()
@@ -109,6 +115,43 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         })
     }
     
+    var sendTraceFileSection: some View {
+        Section {
+            Button(action: {
+                if MFMailComposeViewController.canSendMail() {
+                    self.isShowingMailView.toggle()
+                } else {
+                    print("Can't send emails from this device")
+                    showEmailNotConfiguredWarning = true
+                }
+                if result != nil {
+                    print("Result: \(String(describing: result))")
+                }
+            }) {
+                HStack {
+                    Image(systemName: "envelope")
+                    Text("Send Issue Report", comment: "Title text for the button to send issue report")
+                    
+                }
+            }
+        }
+        .sheet(isPresented: $isShowingMailView) {
+            MailView(result: $result) { composer in
+                
+                composer.setToRecipients(["xdrip@proximus.be"])
+                composer.setMessageBody(NSLocalizedString("Problem Description: ", comment: "default text in email body, when user wants to send trace file."), isHTML: true)
+
+                // add all trace files as attachment
+                let traceFilesInData = Trace.getTraceFilesInData()
+                for (index, traceFileInData) in traceFilesInData.0.enumerated() {
+                    composer.addAttachmentData(traceFileInData as Data, mimeType: "text/txt", fileName: traceFilesInData.1[index])
+                }
+
+            }
+        }
+        .alert(isPresented: $showEmailNotConfiguredWarning, content: { Alert(title: Text("You must  have an email account configured.", comment: "Explain to user that email account must be configured")) })
+    }
+
     var deletionSection: some View {
         Section(header: Spacer()) {
             Button(action: {
@@ -136,6 +179,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     var dismissButton: some View {
         Button(action: { viewModel.hasCompleted?() }) { Text("Done").bold() }
     }
+        
 }
 
 struct LabeledGlucoseView: View {
