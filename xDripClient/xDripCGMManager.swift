@@ -97,7 +97,7 @@ public class xDripCGMManager: NSObject, CGMManager {
         self.init()
     }
 
-    public func fetchNewDataIfNeeded() {
+    public func fetchNewDataIfNeeded(_ completion: @escaping (CGMReadingResult) -> Void)  {
         
         // check if bluetoothTransmitter is still valid - used for heartbeating
         checkCGMBluetoothTransmitter()
@@ -131,10 +131,6 @@ public class xDripCGMManager: NSObject, CGMManager {
             })
         }
 
-    }
-    
-    public func fetchNewDataIfNeeded(_ completion: @escaping (CGMReadingResult) -> Void) {
-        fetchNewDataIfNeeded()
     }
     
     public override var debugDescription: String {
@@ -174,6 +170,19 @@ public class xDripCGMManager: NSObject, CGMManager {
                 
             }
         }
+    }
+
+    /// will call fetchNewDataIfNeeded with completionhandler
+    /// used as wakeup function
+    private func fetchNewDataIfNeeded() {
+        
+        self.fetchNewDataIfNeeded { result in
+            guard case .newData = result else { return }
+            self.delegate.notify { delegate in
+                delegate?.cgmManager(self, hasNew: result)
+            }
+        }
+        
     }
 
     /// check if a new bluetoothTransmitter needs to be assigned and if yes, assign it
