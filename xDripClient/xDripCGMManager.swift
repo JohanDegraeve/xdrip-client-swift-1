@@ -22,7 +22,7 @@ public class xDripCGMManager: NSObject, CGMManager {
     
     public var isOnboarded: Bool = true // No distinction between created and onboarded
     
-    public let shouldSyncToRemoteService = true
+    public let shouldSyncToRemoteService = false
     
     public let appURL: URL? = URL(string: "xdripswift://")
     
