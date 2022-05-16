@@ -38,8 +38,6 @@ public class xDripCGMManager: NSObject, CGMManager {
     
     public let sharedUserDefaults: xDripAppGroup = xDripAppGroup()
     
-    public let fetchQueue = DispatchQueue(label: "xDripCGMManager.fetchQueue")
-
     public var cgmManagerDelegate: CGMManagerDelegate? {
         get {
             return delegate.delegate
@@ -49,6 +47,7 @@ public class xDripCGMManager: NSObject, CGMManager {
         }
     }
 
+    // needed to conform to protocol CGMManager
     public var delegateQueue: DispatchQueue! {
         get {
             return delegate.queue
@@ -102,15 +101,19 @@ public class xDripCGMManager: NSObject, CGMManager {
         // check if bluetoothTransmitter is still valid - used for heartbeating
         checkCGMBluetoothTransmitter()
         
-        fetchQueue.async {
+        trace("in fetchNewDataIfNeeded", category: categoryxDripCGMManager)
+
+        
             _ = self.sharedUserDefaults.latestReadings.sink(receiveCompletion: { status in
                 switch status {
                 case let .failure(error):
+                    trace("    failure occurred", category: self.categoryxDripCGMManager)
                     self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .error(error)) }
                 default: break
                 }
             }, receiveValue: { readings in
                 guard readings.isEmpty == false else {
+                    trace("    readings.isEmpty is true", category: self.categoryxDripCGMManager)
                     self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .noData) }
                     return
                 }
@@ -123,13 +126,20 @@ public class xDripCGMManager: NSObject, CGMManager {
                                      syncIdentifier: "\(Int($0.startDate.timeIntervalSince1970))")
                 }
                 
+                trace("    will iterate through readings, there are %{public}@ readings", category: self.categoryxDripCGMManager, newGlucoseSamples.count.description)
+                
+                for sample in newGlucoseSamples {
+                    // %{public}@
+                    trace("    sample date  %{public}@", category: self.categoryxDripCGMManager, sample.date.debugDescription)
+                    trace("    sample value %{public}@", category: self.categoryxDripCGMManager, sample.quantity.description)
+                }
+                
                 self.delegate.notify { (delegate) in
                     delegate?.cgmManager(self, hasNew: newGlucoseSamples.isEmpty ? .noData : .newData(newGlucoseSamples))
                 }
 
                 self.latestReading = readings.max(by: { $0.startDate < $1.startDate })
             })
-        }
 
     }
     
