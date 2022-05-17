@@ -69,6 +69,9 @@ public class xDripCGMManager: NSObject, CGMManager {
     /// - if nil then there's no heartbeat generated
     private var bluetoothTransmitter: BluetoothTransmitter?
     
+    /// when was the last time that readings where fetched from shared userdefaults
+    private var timeStampLastFetch:Date = Date(timeIntervalSince1970: 0)
+    
     /// for use in trace
     private let categoryxDripCGMManager      =        "xDripClient.xDripCGMManager"
 
@@ -98,48 +101,53 @@ public class xDripCGMManager: NSObject, CGMManager {
 
     public func fetchNewDataIfNeeded(_ completion: @escaping (CGMReadingResult) -> Void)  {
         
+        // there should be at least 1 minute between two fetches
+        guard timeStampLastFetch.timeIntervalSinceNow < TimeInterval(-55.0) else {return}
+        
         // check if bluetoothTransmitter is still valid - used for heartbeating
         checkCGMBluetoothTransmitter()
         
         trace("in fetchNewDataIfNeeded", category: categoryxDripCGMManager)
 
+        timeStampLastFetch = Date()
         
-            _ = self.sharedUserDefaults.latestReadings.sink(receiveCompletion: { status in
-                switch status {
-                case let .failure(error):
-                    trace("    failure occurred", category: self.categoryxDripCGMManager)
-                    self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .error(error)) }
-                default: break
-                }
-            }, receiveValue: { readings in
-                guard readings.isEmpty == false else {
-                    trace("    readings.isEmpty is true", category: self.categoryxDripCGMManager)
-                    self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .noData) }
-                    return
-                }
-                
-                let startDate = self.delegate.call { (delegate) -> Date? in delegate?.startDateToFilterNewData(for: self) }
-                let newGlucoseSamples = readings.filterDateRange(startDate, nil).map {
-                    NewGlucoseSample(date: $0.startDate, quantity: $0.quantity,
-                                     condition: nil, trend: $0.trendType, trendRate: $0.trendRate,
-                                     isDisplayOnly: false, wasUserEntered: false,
-                                     syncIdentifier: "\(Int($0.startDate.timeIntervalSince1970))")
-                }
-                
-                trace("    will iterate through readings, there are %{public}@ readings", category: self.categoryxDripCGMManager, newGlucoseSamples.count.description)
-                
-                for sample in newGlucoseSamples {
-                    // %{public}@
-                    trace("    sample date  %{public}@", category: self.categoryxDripCGMManager, sample.date.debugDescription)
-                    trace("    sample value %{public}@", category: self.categoryxDripCGMManager, sample.quantity.description)
-                }
-                
-                self.delegate.notify { (delegate) in
-                    delegate?.cgmManager(self, hasNew: newGlucoseSamples.isEmpty ? .noData : .newData(newGlucoseSamples))
-                }
+        _ = self.sharedUserDefaults.latestReadings.sink(receiveCompletion: { status in
+            switch status {
+            case let .failure(error):
+                trace("    failure occurred", category: self.categoryxDripCGMManager)
+                self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .error(error)) }
+            default: break
+            }
+        }, receiveValue: { readings in
+            guard readings.isEmpty == false else {
+                trace("    readings.isEmpty is true", category: self.categoryxDripCGMManager)
+                self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .noData) }
+                return
+            }
+            
+            let startDate = self.delegate.call { (delegate) -> Date? in delegate?.startDateToFilterNewData(for: self) }
+            
+            let newGlucoseSamples = readings.filterDateRange(startDate, nil).map {
+                NewGlucoseSample(date: $0.startDate, quantity: $0.quantity,
+                                 condition: nil, trend: $0.trendType, trendRate: $0.trendRate,
+                                 isDisplayOnly: false, wasUserEntered: false,
+                                 syncIdentifier: "\(Int($0.startDate.timeIntervalSince1970))")
+            }
+            
+            trace("    will iterate through readings, there are %{public}@ readings", category: self.categoryxDripCGMManager, newGlucoseSamples.count.description)
+            
+            for sample in newGlucoseSamples {
+                // %{public}@
+                trace("    sample date  %{public}@", category: self.categoryxDripCGMManager, sample.date.debugDescription)
+                trace("    sample value %{public}@", category: self.categoryxDripCGMManager, sample.quantity.description)
+            }
+            
+            self.delegate.notify { (delegate) in
+                delegate?.cgmManager(self, hasNew: newGlucoseSamples.isEmpty ? .noData : .newData(newGlucoseSamples))
+            }
 
-                self.latestReading = readings.max(by: { $0.startDate < $1.startDate })
-            })
+            self.latestReading = readings.max(by: { $0.startDate < $1.startDate })
+        })
 
     }
     
