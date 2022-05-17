@@ -389,7 +389,7 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 
-        trace("didUpdateValueFor for peripheral with name %{public}@, no further processing", category: categoryBlueToothTransmitter,  peripheral.name ?? "'unknown'")
+        trace("didUpdateValueFor for peripheral with name %{public}@", category: categoryBlueToothTransmitter,  peripheral.name ?? "'unknown'")
         
         // call back, to onWakeUp, will trigger reading sharedUserdefaults to check for new readings
         onWakeUp()
