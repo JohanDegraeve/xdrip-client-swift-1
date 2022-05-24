@@ -4,8 +4,9 @@ import os
 
 /// Generic bluetoothtransmitter class that handles scanning, connect, discover services, discover characteristics, subscribe to receive characteristic, reconnect.
 ///
-/// - the connection will be set up and a subscribe to a characteristic will be done, so that the app awakes each time there's a connect or data received
-/// - the class does nothing with the data itself, it's just used as keep alive, as heartbeat
+/// - the connection will be set up and a subscribe to a characteristic will be done
+/// - a heartbeat function is called each time there's a disconnect (needed for Dexcom) or if there's data received on the receive characteristic
+/// - the class does nothing with the data itself
 class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
     // MARK: - private properties
@@ -31,21 +32,21 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     /// for use in trace
     private let categoryBlueToothTransmitter =        "xDripClient.BlueToothTransmitter"
     
-    /// to be called when data is received, this is the actual heartbeat. It will wake up the app, ie bring it from status suspended to active
-    private let onWakeUp: () -> ()
+    /// to be called when data is received or if there's a disconnect, this is the actual heartbeat.
+    private let heartbeat : () -> ()
     
-    /// to be called whenever status change important for UI. In fact it can be called whenever there's in interaction with the CGM. Important is that xDripCGMManager gets the opportunity to change UserDefaults key heartBeatState when necessary
+    /// to be called whenever status change important for UI. In fact it can be called whenever there's in interaction with the CGM.
     private let onHeartBeatStatusChange: () -> ()
     
     // MARK: - Initialization
     
     /// - parameters:
-    ///     -  deviceAddress : the bluetooth Mac address
+    ///     - deviceAddress : the bluetooth Mac address
     ///     - one serviceCBUUID: as string, this is the service to be discovered
     ///     - CBUUID_Receive: receive characteristic uuid as string, to which subscribe should be done
     ///     - onHeartBeatStatusChange : function to call when heartBeat related status changes. This is just to be able to change the UI. Eg when status goes from   scanning to  connected
-    ///     - onWakeUp : function to call when app wakes up
-    init(deviceAddress: String, servicesCBUUID: String, CBUUID_Receive:String, onHeartBeatStatusChange: @escaping () -> (), onWakeUp: @escaping () -> ()) {
+    ///     - heartbeat  : function to call when data is received on the receive characteristic or when there's a disconnect
+    init(deviceAddress: String, servicesCBUUID: String, CBUUID_Receive:String, onHeartBeatStatusChange: @escaping () -> (), heartbeat : @escaping () -> ()) {
         
         self.servicesCBUUIDs = [CBUUID(string: servicesCBUUID)]
 
@@ -53,7 +54,7 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         
         self.deviceAddress = deviceAddress
         
-        self.onWakeUp = onWakeUp
+        self.heartbeat  = heartbeat
         
         self.onHeartBeatStatusChange = onHeartBeatStatusChange
         
@@ -304,6 +305,9 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         
         trace("    didDisconnect peripheral with name %{public}@", category: categoryBlueToothTransmitter , peripheral.name ?? "'unknown'")
         
+        // call heartbeat, useful for Dexcom transmitters, after a disconnect, then there's probably a new reading available
+        heartbeat()
+
         if let error = error {
             
             trace("    error: %{public}@", category: categoryBlueToothTransmitter,  error.localizedDescription)
@@ -391,8 +395,8 @@ class BluetoothTransmitter: NSObject, CBCentralManagerDelegate, CBPeripheralDele
 
         trace("didUpdateValueFor for peripheral with name %{public}@", category: categoryBlueToothTransmitter,  peripheral.name ?? "'unknown'")
         
-        // call back, to onWakeUp, will trigger reading sharedUserdefaults to check for new readings
-        onWakeUp()
+        // call heartbeat
+        heartbeat()
         
     }
     

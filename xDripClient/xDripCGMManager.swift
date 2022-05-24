@@ -10,6 +10,7 @@ import LoopKit
 import LoopKitUI
 import HealthKit
 import Combine
+import Foundation
 
 
 public class xDripCGMManager: NSObject, CGMManager {
@@ -18,7 +19,7 @@ public class xDripCGMManager: NSObject, CGMManager {
     
     public var localizedTitle: String = "xDrip4iOS"
     
-    public var providesBLEHeartbeat: Bool = true
+    public var providesBLEHeartbeat = true
     
     public var isOnboarded: Bool = true // No distinction between created and onboarded
     
@@ -75,14 +76,26 @@ public class xDripCGMManager: NSObject, CGMManager {
     /// for use in trace
     private let categoryxDripCGMManager      =        "xDripClient.xDripCGMManager"
 
+    /// define notification center, to be informed when app comes in background, so that fetchNewData can be forced
+    let notificationCenter = NotificationCenter.default
+
     public override init() {
         
         // call super.init
         super.init()
         
+        /// add observer for will enter foreground
+        notificationCenter.addObserver(self, selector: #selector(runWhenAppWillEnterForeground(_:)), name: UIApplication.willEnterForegroundNotification, object: nil)
+        
+        // add observer for did finish launching
+        notificationCenter.addObserver(self, selector: #selector(runWhenAppWillEnterForeground(_:)), name: UIApplication.didFinishLaunchingNotification, object: nil)
+
         // add observer for useCGMAsHeartbeat
         UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.useCGMAsHeartbeat.rawValue, options: .new, context: nil)
         
+        // possibly cgmTransmitterDeviceAddess in shared user defaults has been changed by xDrip4iOS while Loop was not running. Reassign the value in UserDefaults
+        UserDefaults.standard.cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress
+
         // add observer for shared userdefaults key cgmTransmitterDeviceAddress
         sharedUserDefaults.sharedUserDefaults?.addObserver(self, forKeyPath: xDripAppGroup.keyForcgmTransmitterDeviceAddress, context: nil)
         
@@ -159,7 +172,7 @@ public class xDripCGMManager: NSObject, CGMManager {
         ].joined(separator: "\n")
     }
     
-    // override to observe useCGMAsHeartbeat
+    // override to observe useCGMAsHeartbeat and keyForcgmTransmitterDeviceAddress
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
         if let keyPath = keyPath {
@@ -170,6 +183,8 @@ public class xDripCGMManager: NSObject, CGMManager {
                     
                 case UserDefaults.Key.useCGMAsHeartbeat :
                     bluetoothTransmitter = setupBluetoothTransmitter()
+                    
+                    providesBLEHeartbeat = UserDefaults.standard.useCGMAsHeartbeat
                     
                     setHeartbeatStateText()
                     
@@ -231,7 +246,7 @@ public class xDripCGMManager: NSObject, CGMManager {
 
                 // a new cgm transmitter has been setup in xDrip4iOS
                 // we will connect to the same transmitter here so it can be used as heartbeat
-                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onHeartBeatStatusChange: setHeartbeatStateText, onWakeUp: fetchNewDataIfNeeded)
+                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onHeartBeatStatusChange: setHeartbeatStateText, heartbeat: fetchNewDataIfNeeded)
                 
                 return newBluetoothTransmitter
 
@@ -252,11 +267,11 @@ public class xDripCGMManager: NSObject, CGMManager {
     /// will set text in UserDefaults heartBeatState depending on BluetoothTransmitter status, this is then used in UI
     private func setHeartbeatStateText() {
         
-        let scanning = LocalizedString("Scanning for CGM. Force Close xDrip4iOS. Keep Loop running in the foreground (prevent phone lock). This text will change as soon as a first connection is made. ", comment: "This is when Loop did not yet make a first connection to the CGM. It is scanning. Need to make sure that no other app (like xDrip4iOS) is connected to the CGM")
+        let scanning = LocalizedString("Scanning for CGM. Force close xDrip4iOS (do not disconnect but force close the app). Keep Loop running in the foreground (prevent phone lock). This text will change as soon as a first connection is made. ", comment: "This is when Loop did not yet make a first connection to the CGM. It is scanning. Need to make sure that no other app (like xDrip4iOS) is connected to the CGM")
         
         let firstConnectionMade = LocalizedString("Did connect to CGM. You can now run both xDrip4iOS and Loop. The CGM will be used as heartbeat for Loop.", comment: "Did connect to CGM. Even though it's not connected now, this state remains valid. The CGM will be used as heartbeat for Loop.")
         
-        let cgmUnknown = LocalizedString("You first need to have a made a successful connection between xDrip4iOS and the CGM. Force close Loop, open xDrip4iOS and make sure it's connected. Once done, force close xDrip4iOS (do not disconnect but force close the app), open Loop and come back to here", comment: "There hasn't been a connectin to xDrip4iOS to the CGM. First need to have a made a successful connection between xDrip4iOS and the CGM. Force close Loop, open xDrip4iOS and make sure it's connected. Once done, force close xDrip4iOS, open Loop and come back to here")
+        let cgmUnknown = LocalizedString("You first need to have made a successful connection between xDrip4iOS and the CGM. Force close Loop, open xDrip4iOS and make sure it's connected to the CGM. Once done, Force close xDrip4iOS (do not disconnect but force close the app), open Loop and come back to here", comment: "There hasn't been a connectin to xDrip4iOS to the CGM. First need to have a made a successful connection between xDrip4iOS and the CGM. Force close Loop, open xDrip4iOS and make sure it's connected to the CGM. Once done, Force close xDrip4iOS (do not disconnect but force close the app), open Loop and come back to here")
         
         // this is for example in case user has selected not to use the CGM as heartbeat. In that case the UI should not even show this text. Meaning normally it should never be shown
         let notapplicable = "N/A"
@@ -289,6 +304,13 @@ public class xDripCGMManager: NSObject, CGMManager {
         UserDefaults.standard.heartBeatState = firstConnectionMade
         
     }
+    
+    @objc private func runWhenAppWillEnterForeground(_ : Notification) {
+        
+        fetchNewDataIfNeeded()
+        
+    }
+
     
 }
 // MARK: - AlertResponder implementation
