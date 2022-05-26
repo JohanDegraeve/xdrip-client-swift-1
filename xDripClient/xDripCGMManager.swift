@@ -23,7 +23,7 @@ public class xDripCGMManager: NSObject, CGMManager {
     
     public var isOnboarded: Bool = true // No distinction between created and onboarded
     
-    public let shouldSyncToRemoteService = false
+    public var shouldSyncToRemoteService = UserDefaults.standard.shouldSyncToRemoteService
     
     public let appURL: URL? = URL(string: "xdripswift://")
     
@@ -90,8 +90,11 @@ public class xDripCGMManager: NSObject, CGMManager {
         // add observer for did finish launching
         notificationCenter.addObserver(self, selector: #selector(runWhenAppWillEnterForeground(_:)), name: UIApplication.didFinishLaunchingNotification, object: nil)
 
-        // add observer for useCGMAsHeartbeat
+        // add observer for shouldSyncToRemoteService
         UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.useCGMAsHeartbeat.rawValue, options: .new, context: nil)
+        
+        // add observer for useCGMAsHeartbeat
+        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.shouldSyncToRemoteService.rawValue, options: .new, context: nil)
         
         // possibly cgmTransmitterDeviceAddess in shared user defaults has been changed by xDrip4iOS while Loop was not running. Reassign the value in UserDefaults
         UserDefaults.standard.cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress
@@ -187,6 +190,9 @@ public class xDripCGMManager: NSObject, CGMManager {
                     providesBLEHeartbeat = UserDefaults.standard.useCGMAsHeartbeat
                     
                     setHeartbeatStateText()
+                    
+                case UserDefaults.Key.shouldSyncToRemoteService:
+                    self.shouldSyncToRemoteService = UserDefaults.standard.shouldSyncToRemoteService
                     
                 default:
                     break
@@ -343,8 +349,28 @@ extension UserDefaults {
         /// status of Loop vs CGM, see enum HeartBeatState for description
         case heartBeatState = "heartBeatState"
         
+        /// should Loop upload bg readings to remote service or not. Default false
+        ///
+        /// Used in Loop/Managers/RemoteDataServicesManager.swift, func uploadGlucoseData(to remoteDataService: RemoteDataService)
+        case shouldSyncToRemoteService = "shouldSyncToRemoteService"
+       
     }
-
+    
+    /// should Loop upload bg readings to remote service or not. Default false
+    ///
+    /// Used in Loop/Managers/RemoteDataServicesManager.swift, func uploadGlucoseData(to remoteDataService: RemoteDataService)
+    @objc dynamic public var shouldSyncToRemoteService: Bool {
+        
+        // default value for bool in userdefaults is false
+        get {
+            return bool(forKey: Key.shouldSyncToRemoteService.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.shouldSyncToRemoteService.rawValue)
+        }
+        
+    }
+    
     /// used as local copy of cgmTransmitterDeviceAddress, will be compared regularly against value in shared UserDefaults
     var cgmTransmitterDeviceAddress: String? {
         get {

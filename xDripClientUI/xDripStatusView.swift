@@ -32,6 +32,8 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
 
     @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
     
+    @AppStorage(UserDefaults.Key.shouldSyncToRemoteService.rawValue) private var shouldSyncToRemoteService: Bool = false
+
     /// for some reason the TextEditor that shows the heartBeatState doesn't immediately use multiline. By removing and re-adding it, multiline is used. A trick to force multiline, is to set showHeartBeatText to false as soon as the View is shown, and immediately back to true. Then multiline is used
     @State var showHeartBeatText = true
     
@@ -40,6 +42,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             overviewSection
             heartBeatSection
             latestReadingSection
+            shouldSyncToRemoteServiceSection
             sendTraceFileSection
             deletionSection
         }
@@ -113,6 +116,21 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             showHeartBeatText = false;
             showHeartBeatText = true
         })
+    }
+    
+    var shouldSyncToRemoteServiceSection: some View {
+        
+        Section(header: SectionHeader(label: LocalizedString("Sync", comment: "Section title for sync to remote service section"))) {
+            
+            Toggle(isOn: $shouldSyncToRemoteService) {
+                VStack(alignment: .leading) {
+                    Text("Loop should sync to remote service", comment: "The title text for sync to remote service enabled switch cell")
+                        .padding(.vertical, 3)
+                }
+            }
+
+        }
+
     }
     
     var sendTraceFileSection: some View {
