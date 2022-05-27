@@ -19,11 +19,19 @@ public class xDripCGMManager: NSObject, CGMManager {
     
     public var localizedTitle: String = "xDrip4iOS"
     
-    public var providesBLEHeartbeat = true
-    
+    public var providesBLEHeartbeat: Bool {
+        get {
+            return UserDefaults.standard.useCGMAsHeartbeat
+        }
+    }
+
     public var isOnboarded: Bool = true // No distinction between created and onboarded
     
-    public var shouldSyncToRemoteService = UserDefaults.standard.shouldSyncToRemoteService
+    public var shouldSyncToRemoteService: Bool {
+        get {
+            return UserDefaults.standard.shouldSyncToRemoteService
+        }
+    }
     
     public let appURL: URL? = URL(string: "xdripswift://")
     
@@ -90,12 +98,9 @@ public class xDripCGMManager: NSObject, CGMManager {
         // add observer for did finish launching
         notificationCenter.addObserver(self, selector: #selector(runWhenAppWillEnterForeground(_:)), name: UIApplication.didFinishLaunchingNotification, object: nil)
 
-        // add observer for shouldSyncToRemoteService
-        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.useCGMAsHeartbeat.rawValue, options: .new, context: nil)
-        
         // add observer for useCGMAsHeartbeat
-        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.shouldSyncToRemoteService.rawValue, options: .new, context: nil)
-        
+        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.useCGMAsHeartbeat.rawValue, options: .new, context: nil)
+
         // possibly cgmTransmitterDeviceAddess in shared user defaults has been changed by xDrip4iOS while Loop was not running. Reassign the value in UserDefaults
         UserDefaults.standard.cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress
 
@@ -187,12 +192,7 @@ public class xDripCGMManager: NSObject, CGMManager {
                 case UserDefaults.Key.useCGMAsHeartbeat :
                     bluetoothTransmitter = setupBluetoothTransmitter()
                     
-                    providesBLEHeartbeat = UserDefaults.standard.useCGMAsHeartbeat
-                    
                     setHeartbeatStateText()
-                    
-                case UserDefaults.Key.shouldSyncToRemoteService:
-                    self.shouldSyncToRemoteService = UserDefaults.standard.shouldSyncToRemoteService
                     
                 default:
                     break
@@ -343,15 +343,15 @@ extension UserDefaults {
         /// this is the local stored (ie not shared with xDrip4iOS) copy of the cgm (bluetooth) device address
         case cgmTransmitterDeviceAddress = "com.loopkit.Loop.cgmTransmitterDeviceAddress"
         
-        /// did user ask heartbeat from CGM that is used by xDrip4iOS, default : true
+        /// did user ask heartbeat from CGM that is used by xDrip4iOS, default false
         case useCGMAsHeartbeat = "useCGMAsHeartbeat"
         
-        /// status of Loop vs CGM, see enum HeartBeatState for description
+        /// status of Loop vs CGM, this is text shown to user in UI. Text shows the status of heartbeat
         case heartBeatState = "heartBeatState"
         
         /// should Loop upload bg readings to remote service or not. Default false
         ///
-        /// Used in Loop/Managers/RemoteDataServicesManager.swift, func uploadGlucoseData(to remoteDataService: RemoteDataService)
+        /// Used in Loop/Managers/RemoteDataServicesManager.swift, func uploadGlucoseData(to remoteDataService: RemoteDataService)namic public var shouldSyncToRemoteService: Boo
         case shouldSyncToRemoteService = "shouldSyncToRemoteService"
        
     }
@@ -394,7 +394,7 @@ extension UserDefaults {
         
     }
     
-    /// status of Loop vs CGM, see enum HeartBeatState for description
+    /// status of Loop vs CGM, this is text shown to user in UI. Text shows the status of heartbeat
     @objc dynamic var heartBeatState: String {
         
         // default value for bool in userdefaults is false, by default we want to use heartbeat
