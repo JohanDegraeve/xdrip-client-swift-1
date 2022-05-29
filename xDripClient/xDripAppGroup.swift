@@ -13,16 +13,11 @@ import Combine
 
 public class xDripAppGroup {
     
-    private enum AppGroupError: Error {
+    public enum AppGroupError: Error {
         case data(reason: String)
     }
 
     public let sharedUserDefaults: UserDefaults?
-    
-    public var latestReadings: AnyPublisher<[xDripReading], Swift.Error> {
-        return sharedUserDefaults.publisher.retry(2).tryMap { try self.fetchLatestReadings($0) }
-            .map { $0.filter { $0.isStateValid } }.eraseToAnyPublisher()
-    }
     
     /// key for shared userdefaults
     public static let keyForcgmTransmitterDeviceAddress = "cgmTransmitterDeviceAddress"
@@ -65,7 +60,7 @@ public class xDripAppGroup {
         sharedUserDefaults = UserDefaults.init(suiteName: group)
     }
     
-    private func fetchLatestReadings(_ sharedUserDefaults: UserDefaults? ) throws -> Array<xDripReading> {
+    public func fetchLatestReadings() throws -> Array<xDripReading> {
         guard let encodedLatestReadings = sharedUserDefaults?.data(forKey: "latestReadings") else {
             throw AppGroupError.data(reason: "Couldn't fetch latest readings from xDrip4iOS.")
         }

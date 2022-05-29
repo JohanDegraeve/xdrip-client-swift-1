@@ -132,14 +132,10 @@ public class xDripCGMManager: NSObject, CGMManager {
 
         timeStampLastFetch = Date()
         
-        _ = self.sharedUserDefaults.latestReadings.sink(receiveCompletion: { status in
-            switch status {
-            case let .failure(error):
-                trace("    failure occurred", category: self.categoryxDripCGMManager)
-                self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .error(error)) }
-            default: break
-            }
-        }, receiveValue: { readings in
+        do {
+            
+            let readings = try sharedUserDefaults.fetchLatestReadings()
+            
             guard readings.isEmpty == false else {
                 trace("    readings.isEmpty is true", category: self.categoryxDripCGMManager)
                 self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .noData) }
@@ -155,7 +151,7 @@ public class xDripCGMManager: NSObject, CGMManager {
                                  syncIdentifier: "\(Int($0.startDate.timeIntervalSince1970))")
             }
             
-            trace("    will iterate through readings, there are %{public}@ readings", category: self.categoryxDripCGMManager, newGlucoseSamples.count.description)
+            trace("    will iterate through newGlucoseSamples, there are %{public}@ newGlucoseSamples", category: self.categoryxDripCGMManager, newGlucoseSamples.count.description)
             
             for sample in newGlucoseSamples {
                 // %{public}@
@@ -168,8 +164,24 @@ public class xDripCGMManager: NSObject, CGMManager {
             }
 
             self.latestReading = readings.max(by: { $0.startDate < $1.startDate })
-        })
 
+        } catch let error {
+            
+            if let error = error as? xDripAppGroup.AppGroupError {
+
+                switch error {
+                case .data (let text):
+                    trace("in fetchNewDataIfNeeded, failed to get readings, error = %{public}@", category: categoryxDripCGMManager, text)
+                }
+
+            } else {
+                trace("in fetchNewDataIfNeeded, failed to get readings", category: categoryxDripCGMManager)
+            }
+            
+            self.delegate.notify { (delegate) in delegate?.cgmManager(self, hasNew: .noData) }
+            
+        }
+        
     }
     
     public override var debugDescription: String {
