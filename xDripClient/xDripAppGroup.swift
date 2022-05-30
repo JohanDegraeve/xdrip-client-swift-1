@@ -72,6 +72,12 @@ public class xDripAppGroup {
         
         var transformedReadings: Array<xDripReading> = []
         for reading in latestReadings {
+            
+            // to check that the source of the reading is xDrip4iOS
+            guard let from = reading["from"] as? String, from == "xDrip" else {
+                continue
+            }
+            
             var glucoseTrendType: GlucoseTrend?
             if let rawGlucoseTrendType = reading["Trend"] as? Int {
                 glucoseTrendType = GlucoseTrend(rawValue: rawGlucoseTrendType)

@@ -28,6 +28,8 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     @State private var result: Result<MFMailComposeResult, Error>? = nil
     @State private var isShowingMailView = false
     
+    @State private var showScreenLockConfirmation = false
+    
     @AppStorage(UserDefaults.Key.useCGMAsHeartbeat.rawValue) private var useCGMAsHeartbeat: Bool = false
 
     @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
@@ -39,6 +41,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     var body: some View {
         List {
+            lockScreenSection
             overviewSection
             heartBeatSection
             latestReadingSection
@@ -49,6 +52,26 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         .insetGroupedListStyle()
         .navigationBarTitle(Text("xDrip4iOS", comment: "Title text for the CGM status view"))
         .navigationBarItems(trailing: dismissButton)
+    }
+    
+    var lockScreenSection: some View {
+        
+        VStack(alignment: .leading) {
+            Text("Lock Screen", comment: "The title text for the cell to lock the screen")
+                .padding(.vertical, 3)
+        }
+        .onTapGesture {
+            // prevent screen dim/lock
+            UIApplication.shared.isIdleTimerDisabled = true
+            
+            UserDefaults.standard.screenLockedByxDrip4iOSClient = true
+            
+            showScreenLockConfirmation = true
+            
+        }
+        .alert(isPresented: $showScreenLockConfirmation, content: { Alert(title: Text("Screen locked. Bring the app to the background to unlock.", comment: "confirmation that screen is locked")) })
+
+        
     }
     
     var overviewSection: some View {

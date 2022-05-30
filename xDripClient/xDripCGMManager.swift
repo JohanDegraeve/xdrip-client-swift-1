@@ -97,6 +97,9 @@ public class xDripCGMManager: NSObject, CGMManager {
         
         // add observer for did finish launching
         notificationCenter.addObserver(self, selector: #selector(runWhenAppWillEnterForeground(_:)), name: UIApplication.didFinishLaunchingNotification, object: nil)
+        
+        // add observer when going to background
+        notificationCenter.addObserver(self, selector: #selector(runWhenAppWillEnterBackground(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
 
         // add observer for useCGMAsHeartbeat
         UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.useCGMAsHeartbeat.rawValue, options: .new, context: nil)
@@ -149,14 +152,6 @@ public class xDripCGMManager: NSObject, CGMManager {
                                  condition: nil, trend: $0.trendType, trendRate: $0.trendRate,
                                  isDisplayOnly: false, wasUserEntered: false,
                                  syncIdentifier: "\(Int($0.startDate.timeIntervalSince1970))")
-            }
-            
-            trace("    will iterate through newGlucoseSamples, there are %{public}@ newGlucoseSamples", category: self.categoryxDripCGMManager, newGlucoseSamples.count.description)
-            
-            for sample in newGlucoseSamples {
-                // %{public}@
-                trace("    sample date  %{public}@", category: self.categoryxDripCGMManager, sample.date.debugDescription)
-                trace("    sample value %{public}@", category: self.categoryxDripCGMManager, sample.quantity.description)
             }
             
             self.delegate.notify { (delegate) in
@@ -228,10 +223,7 @@ public class xDripCGMManager: NSObject, CGMManager {
     private func fetchNewDataIfNeeded() {
         
         self.fetchNewDataIfNeeded { result in
-            guard case .newData = result else { return }
-            self.delegate.notify { delegate in
-                delegate?.cgmManager(self, hasNew: result)
-            }
+            // no need to process the result, it's already processed in fetchNewDataIfNeeded and sent to delegate
         }
         
     }
@@ -325,10 +317,23 @@ public class xDripCGMManager: NSObject, CGMManager {
     
     @objc private func runWhenAppWillEnterForeground(_ : Notification) {
         
-        fetchNewDataIfNeeded()
+      fetchNewDataIfNeeded()
         
     }
 
+    @objc private func runWhenAppWillEnterBackground(_ : Notification) {
+        
+        
+        if UserDefaults.standard.screenLockedByxDrip4iOSClient {
+
+            // prevent screen dim/lock
+            UIApplication.shared.isIdleTimerDisabled = false
+            
+            UserDefaults.standard.screenLockedByxDrip4iOSClient = false
+
+        }
+        
+    }
     
 }
 // MARK: - AlertResponder implementation
@@ -365,7 +370,21 @@ extension UserDefaults {
         ///
         /// Used in Loop/Managers/RemoteDataServicesManager.swift, func uploadGlucoseData(to remoteDataService: RemoteDataService)namic public var shouldSyncToRemoteService: Boo
         case shouldSyncToRemoteService = "shouldSyncToRemoteService"
+        
+        /// there's a screen locking feature, this is used to know if it as the xdrip4ios client that locked the screen
+        case screenLockedByxDrip4iOSClient = "screenLockedByxDrip4iOSClient"
        
+    }
+    
+    /// there's a screen locking feature, this is used to know if it as the xdrip4ios client that locked the screen
+    @objc dynamic public var screenLockedByxDrip4iOSClient: Bool {
+            
+        get {
+            return bool(forKey: Key.screenLockedByxDrip4iOSClient.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.screenLockedByxDrip4iOSClient.rawValue)
+        }
     }
     
     /// should Loop upload bg readings to remote service or not. Default false
