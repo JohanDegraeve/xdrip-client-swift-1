@@ -41,11 +41,11 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     var body: some View {
         List {
-            lockScreenSection
             overviewSection
-            heartBeatSection
             latestReadingSection
+            heartBeatSection
             shouldSyncToRemoteServiceSection
+            lockScreenSection
             sendTraceFileSection
             deletionSection
         }
@@ -135,10 +135,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             }
 
         }
-        .onAppear(perform: {
-            showHeartBeatText = false;
-            showHeartBeatText = true
-        })
     }
     
     var shouldSyncToRemoteServiceSection: some View {
@@ -153,6 +149,11 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             }
 
         }
+        // for some reason the heartbeat text in heartBeatSection is not completely shown, unless it's refreshed done at the right moment, which is here.
+        .onAppear(perform: {
+            showHeartBeatText = false;
+            showHeartBeatText = true
+        })
 
     }
     
