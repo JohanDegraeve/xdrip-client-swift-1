@@ -115,7 +115,7 @@ public class xDripCGMManager: NSObject, CGMManager {
         bluetoothTransmitter = setupBluetoothTransmitter()
         
         // set heartbeat state text in userdefaults, this is used in the UI
-        setHeartbeatStateText()
+        setHeartbeatStateTextAndIsIdleTimerDisabled()
         
     }
     
@@ -199,7 +199,7 @@ public class xDripCGMManager: NSObject, CGMManager {
                 case UserDefaults.Key.useCGMAsHeartbeat :
                     bluetoothTransmitter = setupBluetoothTransmitter()
                     
-                    setHeartbeatStateText()
+                    setHeartbeatStateTextAndIsIdleTimerDisabled()
                     
                 default:
                     break
@@ -210,7 +210,7 @@ public class xDripCGMManager: NSObject, CGMManager {
                     
                     checkCGMBluetoothTransmitter()
                     
-                    setHeartbeatStateText()
+                    setHeartbeatStateTextAndIsIdleTimerDisabled()
                     
                 }
                 
@@ -239,10 +239,11 @@ public class xDripCGMManager: NSObject, CGMManager {
             // assign local copy of cgmTransmitterDeviceAddress to the value stored in sharedUserDefaults (possibly nil value)
             UserDefaults.standard.cgmTransmitterDeviceAddress = sharedUserDefaults.cgmTransmitterDeviceAddress
             
-            setHeartbeatStateText()
-
         }
         
+        /// change might be required to text
+        setHeartbeatStateTextAndIsIdleTimerDisabled()
+
     }
     
     /// if UserDefaults.standard.useCGMAsHeartbeat is true and sharedUserDefaults.cgmTransmitterDeviceAddress  then create new BluetoothTransmitter
@@ -256,7 +257,7 @@ public class xDripCGMManager: NSObject, CGMManager {
 
                 // a new cgm transmitter has been setup in xDrip4iOS
                 // we will connect to the same transmitter here so it can be used as heartbeat
-                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onHeartBeatStatusChange: setHeartbeatStateText, heartbeat: fetchNewDataIfNeeded)
+                let newBluetoothTransmitter = BluetoothTransmitter(deviceAddress: cgmTransmitterDeviceAddress, servicesCBUUID: cgmTransmitter_CBUUID_Service, CBUUID_Receive: cgmTransmitter_CBUUID_Receive, onHeartBeatStatusChange: setHeartbeatStateTextAndIsIdleTimerDisabled, heartbeat: fetchNewDataIfNeeded)
                 
                 return newBluetoothTransmitter
 
@@ -274,8 +275,9 @@ public class xDripCGMManager: NSObject, CGMManager {
 
     }
     
-    /// will set text in UserDefaults heartBeatState depending on BluetoothTransmitter status, this is then used in UI
-    private func setHeartbeatStateText() {
+    /// will set text in UserDefaults heartBeatState depending on BluetoothTransmitter status, this is then used in UI.
+    /// Also sets UIApplication.shared.isIdleTimerDisabled depending on whether Loop is scanning for CGM or not
+    private func setHeartbeatStateTextAndIsIdleTimerDisabled() {
         
         let scanning = LocalizedString("Scanning for CGM. Force close xDrip4iOS (do not disconnect but force close the app). Keep Loop running in the foreground (prevent phone lock). This text will change as soon as a first connection is made. ", comment: "This is when Loop did not yet make a first connection to the CGM. It is scanning. Need to make sure that no other app (like xDrip4iOS) is connected to the CGM")
         
@@ -289,30 +291,41 @@ public class xDripCGMManager: NSObject, CGMManager {
         // in case user has selected not to use cgm as heartbeat
         if !UserDefaults.standard.useCGMAsHeartbeat {
             UserDefaults.standard.heartBeatState = notapplicable
+            setIsIdleTimerDisable(to: false)
             return
         }
         
         // in case xDrip4iOS did not make a first connection to the CGM (or explicitly disconnected from the CGM)
         if UserDefaults.standard.cgmTransmitterDeviceAddress == nil {
             UserDefaults.standard.heartBeatState = cgmUnknown
+            setIsIdleTimerDisable(to: false)
             return
         }
         
         // now there should be a bluetoothTransmitter, if not there's a coding error
         guard let bluetoothTransmitter = bluetoothTransmitter else {
             UserDefaults.standard.heartBeatState = notapplicable
+            setIsIdleTimerDisable(to: false)
             return
         }
 
         // if peripheral in bluetoothTransmitter is still nil, then it means Loop is still scanning for the CGM, it didn't make a first connection yet
         if bluetoothTransmitter.peripheral == nil {
             UserDefaults.standard.heartBeatState = scanning
+            setIsIdleTimerDisable(to: true)
             return
         }
         
         // in all other cases, the state should be ok
         UserDefaults.standard.heartBeatState = firstConnectionMade
+        setIsIdleTimerDisable(to: false)
         
+    }
+    
+    /// sets UIApplication.shared.isIdleTimerDisabled , and makes a trace with that value
+    private func setIsIdleTimerDisable(to: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = to
+        trace("setting UIApplication.shared.isIdleTimerDisabled to %{public}@", category: categoryxDripCGMManager, to.description)
     }
     
     @objc private func runWhenAppWillEnterForeground(_ : Notification) {
