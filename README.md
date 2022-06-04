@@ -1,17 +1,42 @@
+## functionality
+
+- uses xDrip4iOS as a CGM : readings are fechted from UserDefaults, where they are stored by xDrip4iOS.
+- can use the CGM as heartbeat (optional) : if enabled, then it will make a connection to the CGM (in parallel to xDrip4iOS) just for the sake of keeping Loop alive. Can be used with Libre or Dexcom. In case of Libre, the reading will run 1 minute behind.
+  - If you haven't setup your CGM yet in xDrip4iOS : 
+      - Force close Loop
+      - in xDrip4iOS make sure you have made a first connection to the CGM
+  - force close xDrip4iOS
+  - reopen Loop
+  - select xDrip4iOS as CGM and open the xDrip4iOS UI
+  - enable "use CGM as heartbeat"
+  - keep the app in the foreground and wait till the text under the UISwitch changes to "Did connect to CGM. You can now run both xDrip4iOS and Loop". Once you see this text, you can reopen xDrip4iOS
+- option to enable/disalbe "Loop should sync to remote service" : in case you let xDrip4iOS upload readings to NightScout, then you can disable this, otherwise all readings will be uploaded twice
+- There's also an option in the xDrip4iOS UI to lock the screen, ie the keep Loop in the foreground 
+- Option to send issue report : this will send logging informatin related to the heartbeat mechanism only. It's send by default to xdrip@proximus.be
+
+Latest test done with loop dev branch, commit 6286f61a61a9794179f551f076c3b2b0ec127dac
+
+Based on client written by Julian Groen : https://github.com/julian-groen/xdrip-client-swift
+
+## Prerequisites
+
+- This only works if both xDrip4iOS and Loop are built using the same App Group!
+
+- You probably already know but in case you don't, you must have Carthage 0.36.0 installed : https://www.loopandlearn.org/carthage-0-36-0/
+(more info : https://www.loopandlearn.org/carthage-0-36-0/)
 
 ## Start with a clean LoopWorkspace based on dev
 
 * Download a fresh copy of LoopWorkspace dev into a subfolder of your choice
 ```
-cd ~
-mkdir Code && cd Code
+cd to your preferred directory
 git clone --branch=dev --recurse-submodules https://github.com/LoopKit/LoopWorkspace
 cd LoopWorkspace
 ```
 
 * Add xDripClient submodule
 ```
-git submodule add -b master https://github.com/julian-groen/xdrip-client-swift.git xdrip-client-swift
+git submodule add -b master https://github.com/johandegraeve/xdrip-client-swift-1.git xdrip-client-swift
 ```
 
 ## In Xcode, add xDripClient project into LoopWorkspace
