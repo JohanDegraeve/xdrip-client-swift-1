@@ -22,9 +22,6 @@ Based on client written by Julian Groen : https://github.com/julian-groen/xdrip-
 
 - This only works if both xDrip4iOS and Loop are built using the same App Group!
 
-- You probably already know but in case you don't, you must have Carthage 0.36.0 installed : https://www.loopandlearn.org/carthage-0-36-0/
-(more info : https://www.loopandlearn.org/carthage-0-36-0/)
-
 ## Start with a clean LoopWorkspace based on dev
 
 * Download a fresh copy of LoopWorkspace dev into a subfolder of your choice
