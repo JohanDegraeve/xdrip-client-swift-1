@@ -64,7 +64,7 @@ git submodule add -b master https://github.com/johandegraeve/xdrip-client-swift-
 ## Troubleshooting
 Loop not getting xDrip data?
 * Wait a moment. On first launch the plugin will probably be empty, as it doesn't prompt xDrip to re-read.
-* Make sure xDrip is receiving readings! (Did you open the correct copy of xDrip? You might now have two copies. Delete both, and reinstall.)
+* Make sure xDrip is receiving readings! (Did you open the correct copy of xDrip? You might now have two copies. In case you have, make sure only one copy receives readings from the transmitter.)
 * Make sure Loop and xDrip are using the same App Group! Really!
 * Make sure both Loop and xDrip are still running in the background - try killing recent apps, then killing and reopening Loop and xDrip. Make ure they have all the iOS permissions they need.
 
