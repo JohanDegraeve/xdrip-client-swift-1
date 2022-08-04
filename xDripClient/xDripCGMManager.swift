@@ -145,7 +145,13 @@ public class xDripCGMManager: NSObject, CGMManager {
                 return
             }
             
-            let startDate = self.delegate.call { (delegate) -> Date? in delegate?.startDateToFilterNewData(for: self) }
+            var startDate = Date(timeIntervalSinceNow: -TimeInterval(30*60))
+            if let latestReading = latestReading {
+                if startDate.timeIntervalSince(latestReading.startDate) < 30*60 {
+                    startDate = latestReading.startDate
+                }
+            }
+            
             
             let newGlucoseSamples = readings.filterDateRange(startDate, nil).map {
                 NewGlucoseSample(date: $0.startDate, quantity: $0.quantity,
@@ -291,41 +297,30 @@ public class xDripCGMManager: NSObject, CGMManager {
         // in case user has selected not to use cgm as heartbeat
         if !UserDefaults.standard.useCGMAsHeartbeat {
             UserDefaults.standard.heartBeatState = notapplicable
-            setIsIdleTimerDisable(to: false)
             return
         }
         
         // in case xDrip4iOS did not make a first connection to the CGM (or explicitly disconnected from the CGM)
         if UserDefaults.standard.cgmTransmitterDeviceAddress == nil {
             UserDefaults.standard.heartBeatState = cgmUnknown
-            setIsIdleTimerDisable(to: false)
             return
         }
         
         // now there should be a bluetoothTransmitter, if not there's a coding error
         guard let bluetoothTransmitter = bluetoothTransmitter else {
             UserDefaults.standard.heartBeatState = notapplicable
-            setIsIdleTimerDisable(to: false)
             return
         }
 
         // if peripheral in bluetoothTransmitter is still nil, then it means Loop is still scanning for the CGM, it didn't make a first connection yet
         if bluetoothTransmitter.peripheral == nil {
             UserDefaults.standard.heartBeatState = scanning
-            setIsIdleTimerDisable(to: true)
             return
         }
         
         // in all other cases, the state should be ok
         UserDefaults.standard.heartBeatState = firstConnectionMade
-        setIsIdleTimerDisable(to: false)
         
-    }
-    
-    /// sets UIApplication.shared.isIdleTimerDisabled , and makes a trace with that value
-    private func setIsIdleTimerDisable(to: Bool) {
-        UIApplication.shared.isIdleTimerDisabled = to
-        trace("setting UIApplication.shared.isIdleTimerDisabled to %{public}@", category: categoryxDripCGMManager, to.description)
     }
     
     @objc private func runWhenAppWillEnterForeground(_ : Notification) {
