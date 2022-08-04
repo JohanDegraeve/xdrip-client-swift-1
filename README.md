@@ -1,3 +1,5 @@
+This is a https://github.com/loopkit/loop plugin to connect https://github.com/JohanDegraeve/xdripswift to Loop
+
 ## functionality
 
 - uses xDrip4iOS as a CGM : readings are fechted from UserDefaults, where they are stored by xDrip4iOS.
