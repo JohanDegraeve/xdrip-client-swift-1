@@ -46,7 +46,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             heartBeatSection
             shouldSyncToRemoteServiceSection
             lockScreenSection
-            sendTraceFileSection
             deletionSection
         }
         .insetGroupedListStyle()
