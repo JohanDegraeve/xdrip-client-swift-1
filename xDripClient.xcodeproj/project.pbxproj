@@ -27,8 +27,6 @@
 		0AA1BFE027E031060098B986 /* xDripClientUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 0AA1BFDF27E031060098B986 /* xDripClientUI.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0AA1BFE327E032920098B986 /* xDripCGMManager+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA1BFE127E032910098B986 /* xDripCGMManager+UI.swift */; };
 		0AA1BFE427E032920098B986 /* UICoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA1BFE227E032910098B986 /* UICoordinator.swift */; };
-		0AA1BFEB27E0349A0098B986 /* carthage.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0AA1BFE927E0344A0098B986 /* carthage.sh */; };
-		0AA1BFEC27E0349A0098B986 /* copy-frameworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0AA1BFEA27E0344A0098B986 /* copy-frameworks.sh */; };
 		0AA1BFEE27E0354B0098B986 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA1BFED27E0354B0098B986 /* OSLog.swift */; };
 		0AA1BFEF27E0357E0098B986 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA1BFED27E0354B0098B986 /* OSLog.swift */; };
 		0AA1BFF227E035E60098B986 /* xDripClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA1BFD327E030190098B986 /* xDripClientUI.framework */; };
@@ -434,8 +432,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0AA1BFEC27E0349A0098B986 /* copy-frameworks.sh in Resources */,
-				0AA1BFEB27E0349A0098B986 /* carthage.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
