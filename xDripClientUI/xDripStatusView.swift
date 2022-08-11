@@ -32,6 +32,8 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @AppStorage(UserDefaults.Key.useCGMAsHeartbeat.rawValue) private var useCGMAsHeartbeat: Bool = false
 
+    @AppStorage(UserDefaults.Key2.keyForAddManualTempBasals.rawValue) private var usetempBasalAsIOB: Bool = false
+
     @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
     
     @AppStorage(UserDefaults.Key.shouldSyncToRemoteService.rawValue) private var shouldSyncToRemoteService: Bool = false
@@ -46,6 +48,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             heartBeatSection
             shouldSyncToRemoteServiceSection
             lockScreenSection
+            usemanualtempbasalSection
             deletionSection
         }
         .insetGroupedListStyle()
@@ -193,6 +196,20 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         .alert(isPresented: $showEmailNotConfiguredWarning, content: { Alert(title: Text("You must  have an email account configured.", comment: "Explain to user that email account must be configured")) })
     }
 
+    var usemanualtempbasalSection: some View {
+        
+        Section(header: SectionHeader(label: LocalizedString("Use manual temp basal in GlucoseEfect", comment: "Section title"))) {
+            
+            Toggle(isOn: $usetempBasalAsIOB) {
+                VStack(alignment: .leading) {
+                    Text("Use temp basal", comment: "The title")
+                        .padding(.vertical, 3)
+                }
+            }
+
+        }
+    }
+    
     var deletionSection: some View {
         Section(header: Spacer()) {
             Button(action: {

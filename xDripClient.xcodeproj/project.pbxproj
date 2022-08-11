@@ -43,6 +43,7 @@
 		F87C2BBD27E68F9D0053D946 /* StringProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BBC27E68F9D0053D946 /* StringProtocol.swift */; };
 		F87C2BBF27E7DEE70053D946 /* CBManagerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BBE27E7DEE70053D946 /* CBManagerState.swift */; };
 		F87C2BC127EA74260053D946 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87C2BC027EA74260053D946 /* URL.swift */; };
+		F8C16CE528A7AE650041E8B8 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C16CE428A7AE650041E8B8 /* UserDefaults.swift */; };
 		F8CB9E65282FDB20008E8EA1 /* MailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CB9E63282FDABD008E8EA1 /* MailView.swift */; };
 		F8CB9E67282FE343008E8EA1 /* ConstantsxDripClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CB9E66282FE343008E8EA1 /* ConstantsxDripClient.swift */; };
 /* End PBXBuildFile section */
@@ -125,6 +126,7 @@
 		F87C2BBC27E68F9D0053D946 /* StringProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringProtocol.swift; sourceTree = "<group>"; };
 		F87C2BBE27E7DEE70053D946 /* CBManagerState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CBManagerState.swift; sourceTree = "<group>"; };
 		F87C2BC027EA74260053D946 /* URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URL.swift; sourceTree = "<group>"; };
+		F8C16CE428A7AE650041E8B8 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		F8CB9E63282FDABD008E8EA1 /* MailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailView.swift; sourceTree = "<group>"; };
 		F8CB9E66282FE343008E8EA1 /* ConstantsxDripClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstantsxDripClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -263,6 +265,7 @@
 				F87C2BC027EA74260053D946 /* URL.swift */,
 				F87C2BBE27E7DEE70053D946 /* CBManagerState.swift */,
 				F87C2BBC27E68F9D0053D946 /* StringProtocol.swift */,
+				F8C16CE428A7AE650041E8B8 /* UserDefaults.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -478,6 +481,7 @@
 				0A53987C27E0CA0100077BAF /* Framework.swift in Sources */,
 				0AA1BFF627E0BCE00098B986 /* xDripReading.swift in Sources */,
 				0A53988327E0CCB700077BAF /* xDripAppGroup.swift in Sources */,
+				F8C16CE528A7AE650041E8B8 /* UserDefaults.swift in Sources */,
 				F87C2BC127EA74260053D946 /* URL.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
