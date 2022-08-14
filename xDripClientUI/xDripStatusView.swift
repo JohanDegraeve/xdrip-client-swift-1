@@ -34,12 +34,22 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
 
     @AppStorage(UserDefaults.Key2.keyForAddManualTempBasals.rawValue) private var usetempBasalAsIOB: Bool = false
 
+    @AppStorage(UserDefaults.Key2.keyForUseVariableBasal.rawValue) private var useVariableBasal: Bool = false
+    
+    @AppStorage(UserDefaults.Key2.keyForPercentageVariableBasal.rawValue) private var percentageVariableBasal: Int = 100
+
     @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
     
     @AppStorage(UserDefaults.Key.shouldSyncToRemoteService.rawValue) private var shouldSyncToRemoteService: Bool = false
 
     /// for some reason the TextEditor that shows the heartBeatState doesn't immediately use multiline. By removing and re-adding it, multiline is used. A trick to force multiline, is to set showHeartBeatText to false as soon as the View is shown, and immediately back to true. Then multiline is used
     @State var showHeartBeatText = true
+    
+    let percentageformatter: NumberFormatter =  {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .percent
+        return formatter
+    }()
     
     var body: some View {
         List {
@@ -49,6 +59,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             shouldSyncToRemoteServiceSection
             lockScreenSection
             usemanualtempbasalSection
+            useVariableBasalSection
             deletionSection
         }
         .insetGroupedListStyle()
@@ -210,6 +221,39 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         }
     }
     
+    var useVariableBasalSection: some View {
+        
+        Section(header: SectionHeader(label: LocalizedString("Use variable basal", comment: "Section title"))) {
+            
+            if !usetempBasalAsIOB {
+
+                Toggle(isOn: $useVariableBasal) {
+                    VStack(alignment: .leading) {
+                        Text("Use variable basal", comment: "The title")
+                            .padding(.vertical, 3)
+                    }
+                }
+                
+                HStack {
+                    Picker("Percentage", selection: $percentageVariableBasal) {
+                        ForEach(Array(stride(from: 0, to: 101, by: 10)), id: \.self) { index in
+                            Text("\(index)")
+                        }
+                    }
+                    
+                }
+
+            } else {
+                
+                LabeledValueView(
+                    label: LocalizedString("Use variable basal", comment: "Section title"),
+                    value: "Off"
+                )
+                
+            }
+            
+        }
+    }
     var deletionSection: some View {
         Section(header: Spacer()) {
             Button(action: {
