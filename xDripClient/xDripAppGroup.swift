@@ -70,6 +70,15 @@ public class xDripAppGroup {
             throw AppGroupError.data(reason: "Couldn't decode latest readings from xDrip4iOS.")
         }
         
+        /// to keep track of most recent reading
+        var timeStampMostRecentReading = Date(timeIntervalSince1970: 0)
+        
+        /// to keep track of GlucoseTrend of that most recent reading
+        var glucoseTrendMostRecentReading:GlucoseTrend?
+        
+        /// to keep track of value of the most recent reading
+        var glucoseValueMostRecentReading: HKQuantity?
+        
         var transformedReadings: Array<xDripReading> = []
         for reading in latestReadings {
             
@@ -96,8 +105,23 @@ public class xDripAppGroup {
             if let trend = glucoseTrendType, let glucose = glucoseValue, let datetime = glucoseStartDate {
                 let reading = xDripReading(trendType: trend, quantity: glucose, startDate: datetime)
                 transformedReadings.append(reading)
+                
+                if datetime > timeStampMostRecentReading {
+                    timeStampMostRecentReading = datetime
+                    glucoseTrendMostRecentReading = trend
+                    glucoseValueMostRecentReading = glucoseValue
+                }
+                
             }
         }
+        
+        // store latest reading in UserDefaults
+        if let glucoseTrendMostRecentReading = glucoseTrendMostRecentReading, let glucoseValueMostRecentReading = glucoseValueMostRecentReading {
+            UserDefaults.standard.latestGlucoseTrend = glucoseTrendMostRecentReading.rawValue
+            UserDefaults.standard.latestGlucoseValue = glucoseValueMostRecentReading.doubleValue(for: .milligramsPerDeciliter)
+            UserDefaults.standard.latestGlucoseTimeStamp = timeStampMostRecentReading
+        }
+        
         return transformedReadings
     }
     
