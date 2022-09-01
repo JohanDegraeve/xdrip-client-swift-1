@@ -30,6 +30,22 @@ fileprivate let getTimeStampStartOfAutoBasalDateAsString:() -> String = {
     }
 }
 
+/// not yet used
+fileprivate let getTimeStampStartOfAddManualTempBasalAsString:() -> String = {
+
+    let dateFormatter = DateFormatter()
+    dateFormatter.locale = Locale.current
+    dateFormatter.dateStyle = .short
+    dateFormatter.timeStyle = .short
+
+    if let date = UserDefaults.standard.object(forKey: "keyTimeStampStartAddManualTempBasals") as? Date {
+        return dateFormatter.string(from: date)
+    } else {
+        return ""
+    }
+
+}
+
 struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @ObservedObject var viewModel: Model
@@ -48,6 +64,8 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     @AppStorage(UserDefaults.Key.useCGMAsHeartbeat.rawValue) private var useCGMAsHeartbeat: Bool = false
 
     @AppStorage(UserDefaults.Key2.keyForAddManualTempBasals.rawValue) private var usetempBasalAsIOB: Bool = false
+    
+    @AppStorage(UserDefaults.Key2.keyForDurationAddManualTempBasalsInHours.rawValue) private var durationAddManualTempBasalsInHours: Int = UserDefaults.standard.durationAddManualTempBasalsInHours
 
     @AppStorage(UserDefaults.Key2.keyForUseVariableBasal.rawValue) private var useVariableBasal: Bool = false
     
@@ -67,6 +85,8 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     @State var showHeartBeatText = true
     
     @State var timeStampStartOfAutoBasal = getTimeStampStartOfAutoBasalDateAsString()
+    
+    @State var timeSTampAddManualTempBasal = getTimeStampStartOfAddManualTempBasalAsString()
     
     let percentageformatter: NumberFormatter =  {
         let formatter = NumberFormatter()
@@ -240,6 +260,18 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
                     Text("Use manual temp basal", comment: "The title")
                         .padding(.vertical, 3)
                 }
+            }
+            .onChange(of: usetempBasalAsIOB) { value in
+                UserDefaults.standard.addManualTempBasals = value
+            }
+
+            HStack {
+                Picker("Duration (hours)", selection: $durationAddManualTempBasalsInHours) {
+                    ForEach(Array(stride(from: 1, to: 6, by: 1)), id: \.self) { index in
+                        Text("\(index)")
+                    }
+                }
+                
             }
 
         }

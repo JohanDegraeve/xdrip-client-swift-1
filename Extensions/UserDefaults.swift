@@ -18,6 +18,12 @@ extension UserDefaults {
         /// shoud manual temp basals be included in glucose effects  calculation, yes or no - default false
         case keyForAddManualTempBasals = "keyForAddManualTempBasals"
         
+        /// how long to add manual temp basals, after this period keyForAddManualTempBasals will be set to false
+        case keyForDurationAddManualTempBasalsInHours = "keyForDurationAddManualTempBasalsInHours"
+        
+        /// timestamp when keyForAddManualTempBasals was set to true
+        case keyTimeStampStartAddManualTempBasals = "keyTimeStampStartAddManualTempBasals"
+        
         /// should basal be adapted depending on current bg value
         case keyForUseVariableBasal = "keyForUseVariableBasal"
         
@@ -93,6 +99,16 @@ extension UserDefaults {
         }
     }
     
+    /// timestamp start of automatic basal
+    public var timeStampStartAddManualTempBasals:Date? {
+        get {
+            return object(forKey: Key2.keyTimeStampStartAddManualTempBasals.rawValue) as? Date
+        }
+        set {
+            set(newValue, forKey: Key2.keyTimeStampStartAddManualTempBasals.rawValue)
+        }
+    }
+    
     /// is autobasal running or not
     ///
     /// if set to true, then timeStampStartOfAutoBasal is set to now - if set to false then timeStampStartOfAutoBasal is set to nil
@@ -119,6 +135,12 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key2.keyForAddManualTempBasals.rawValue)
+            
+            // if set to true, then set also the timestamp
+            if newValue {
+                timeStampStartAddManualTempBasals = Date()
+            }
+
         }
     }
 
@@ -133,7 +155,7 @@ extension UserDefaults {
         }
     }
     
-    /// in case keyForUseVariableBasal is true, this is the percentage to be used - value between 0 and 100 - default 100
+    /// in case useVariableBasal is true, this is the percentage to be used - value between 0 and 100 - default 100
     public var percentageVariableBasal: Int {
         get {
             let returnValue = integer(forKey: Key2.keyForPercentageVariableBasal.rawValue)
@@ -149,7 +171,7 @@ extension UserDefaults {
         }
     }
 
-    /// in case keyForUseVariableBasal is true, this is the percentage to be used - value between 0 and 100 - default 100
+    /// in case autoBasalRunning is true, this is the multiplier to be used - value between 1 and 3.9
     public var autoBasalMultiplier: Double {
         get {
             let returnValue = double(forKey: Key2.keyAutoBasalMultiplier.rawValue)
@@ -176,6 +198,20 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key2.keyForAutoBasalDurationInHours.rawValue)
+        }
+    }
+    
+    public var durationAddManualTempBasalsInHours: Int {
+        get {
+            let returnValue = integer(forKey: Key2.keyForDurationAddManualTempBasalsInHours.rawValue)
+            // if 0 set to default value
+            if returnValue == 0 {
+                set(1, forKey: Key2.keyForDurationAddManualTempBasalsInHours.rawValue)
+            }
+            return returnValue
+        }
+        set {
+            set(newValue, forKey: Key2.keyForDurationAddManualTempBasalsInHours.rawValue)
         }
     }
     
