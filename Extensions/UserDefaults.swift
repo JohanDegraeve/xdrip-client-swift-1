@@ -51,6 +51,10 @@ extension UserDefaults {
         /// will have timestamp for most recent reading, to be used in autobasal
         case keyForLatestGlucoseTimeStamp = "keyForLatestGlucoseTimeStamp"
         
+        case keyTimeStampStartCalculateTotalDoses = "keyTimeStampStartCalculateTotalDoses"
+        
+        case keyTimeStampEndCalculateTotalDoses = "keyTimeStampEndCalculateTotalDoses"
+        
     }
     
     /// will have glucose value for most recent reading, to be used in autobasal
@@ -72,6 +76,32 @@ extension UserDefaults {
         }
     }
     
+    public var timeStampStartCalculateTotalDoses : Date {
+        get {
+            if let currentValue = object(forKey: Key2.keyTimeStampStartCalculateTotalDoses.rawValue) as? Date {
+                return currentValue
+            } else {
+                return Date().addingTimeInterval(-3600.0*6)
+            }
+        }
+        set {
+            set(newValue, forKey: Key2.keyTimeStampStartCalculateTotalDoses.rawValue)
+        }
+    }
+    
+    public var timeStampEndCalculateTotalDoses : Date {
+        get {
+            if let currentValue = object(forKey: Key2.keyTimeStampEndCalculateTotalDoses.rawValue) as? Date {
+                return currentValue
+            } else {
+                return Date().addingTimeInterval(3600.0*6)
+            }
+        }
+        set {
+            set(newValue, forKey: Key2.keyTimeStampEndCalculateTotalDoses.rawValue)
+        }
+    }
+
     /// will have value of trend for the latest reading, to be used in autobasal
     ///      case upUpUp       = 1
     ///      case upUp         = 2

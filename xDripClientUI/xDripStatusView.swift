@@ -46,6 +46,55 @@ fileprivate let getTimeStampStartOfAddManualTempBasalAsString:() -> String = {
 
 }
 
+fileprivate let healthKitStore = HKHealthStore()
+
+/// calculates insulin doses from
+fileprivate func calculateTotalInsulin(from: Date, to: Date?, completion: @escaping (Double?) -> ()) {
+    
+    let predicate = HKQuery.predicateForSamples(withStart: from, end: to, options: [])
+    
+    let query = HKSampleQuery(sampleType: HKSampleType.quantityType(forIdentifier: HKQuantityTypeIdentifier.insulinDelivery)!, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { (query, results, error) in
+        
+        if error != nil {
+            DispatchQueue.main.async {
+                completion(nil)
+            }
+        }
+        
+        guard let results = results as? [HKQuantitySample] else {
+            DispatchQueue.main.async {
+                completion(nil)
+            }
+            return
+        }
+        
+        guard !results.isEmpty else {
+            DispatchQueue.main.async {
+                completion(nil)
+            }
+            return
+        }
+
+        let total = results.reduce(0.0, { (base, result) -> Double in
+            
+            let newresult = result.quantity.doubleValue(for: HKUnit.internationalUnit())
+            //result.
+            print("newresult date = \(result.startDate.description(with:.current)), newresult value = \(newresult.description)")
+            
+            return base + newresult
+                                                        
+        })
+        
+        DispatchQueue.main.async {
+            completion(Double(Int(total * 10.0))/10.0)
+        }
+
+    }
+    
+    healthKitStore.execute(query)
+    
+}
+
 struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @ObservedObject var viewModel: Model
@@ -88,6 +137,12 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @State var timeSTampAddManualTempBasal = getTimeStampStartOfAddManualTempBasalAsString()
     
+    @State var timeStampStartCalculateTotalDoses: Date = UserDefaults.standard.timeStampStartCalculateTotalDoses
+    
+    @State var timeStampEndCalculateTotalDoses: Date = UserDefaults.standard.timeStampEndCalculateTotalDoses
+    
+    @State var totalDose = 0.0
+    
     let percentageformatter: NumberFormatter =  {
         let formatter = NumberFormatter()
         formatter.numberStyle = .percent
@@ -103,12 +158,74 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             lockScreenSection
             usemanualtempbasalSection
             useVariableBasalSection
+            calculateTotalDoseSection
             autoBasalRunningSecion
             deletionSection
         }
         .insetGroupedListStyle()
         .navigationBarTitle(Text("xDrip4iOS", comment: "Title text for the CGM status view"))
         .navigationBarItems(trailing: dismissButton)
+    }
+    
+    var calculateTotalDoseSection: some View {
+
+        Section(header: SectionHeader(label: LocalizedString("Calculate total dose (inclusive scheduled basal)", comment: ""))) {
+
+            VStack(alignment: .leading) {
+
+                Text(NSLocalizedString("Start Date", comment: "Date picker label"))
+
+                DatePicker(
+                    "",
+                    selection: $timeStampStartCalculateTotalDoses,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .pickerStyle(WheelPickerStyle())
+                .onChange(of: timeStampStartCalculateTotalDoses, perform: { value in
+                    
+                    UserDefaults.standard.timeStampStartCalculateTotalDoses = timeStampStartCalculateTotalDoses
+                    
+                    calculateTotalInsulin(from: timeStampStartCalculateTotalDoses, to: timeStampEndCalculateTotalDoses, completion: { total in
+                        totalDose = total ?? 0.0
+                    })
+                    
+                })
+                
+            }
+
+            VStack(alignment: .leading) {
+                
+                Text(NSLocalizedString("End Date", comment: "Date picker label"))
+
+                DatePicker(
+                    "",
+                    selection: $timeStampEndCalculateTotalDoses,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .pickerStyle(WheelPickerStyle())
+                .onChange(of: timeStampEndCalculateTotalDoses, perform: { value in
+                    
+                    UserDefaults.standard.timeStampEndCalculateTotalDoses = timeStampEndCalculateTotalDoses
+                    
+                    calculateTotalInsulin(from: timeStampStartCalculateTotalDoses, to: timeStampEndCalculateTotalDoses, completion: { total in
+                        totalDose = total ?? 0.0
+                    })
+                    
+                })
+                
+            }
+
+            LabeledValueView(
+                label: LocalizedString("Amount", comment: ""),
+                value: totalDose.description
+            )
+            .onAppear(perform: {
+                calculateTotalInsulin(from: timeStampStartCalculateTotalDoses, to: timeStampEndCalculateTotalDoses, completion: { total in
+                    totalDose = total ?? 0.0
+                })
+            })
+        }
+
     }
     
     var lockScreenSection: some View {
