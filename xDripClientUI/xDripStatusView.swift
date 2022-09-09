@@ -112,10 +112,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @AppStorage(UserDefaults.Key.useCGMAsHeartbeat.rawValue) private var useCGMAsHeartbeat: Bool = false
 
-    @AppStorage(UserDefaults.Key2.keyForAddManualTempBasals.rawValue) private var usetempBasalAsIOB: Bool = false
-    
-    @AppStorage(UserDefaults.Key2.keyForDurationAddManualTempBasalsInHours.rawValue) private var durationAddManualTempBasalsInHours: Int = UserDefaults.standard.durationAddManualTempBasalsInHours
-
     @AppStorage(UserDefaults.Key2.keyForUseVariableBasal.rawValue) private var useVariableBasal: Bool = false
     
     @AppStorage(UserDefaults.Key2.keyForPercentageVariableBasal.rawValue) private var percentageVariableBasal: Int = UserDefaults.standard.percentageVariableBasal
@@ -156,7 +152,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             heartBeatSection
             shouldSyncToRemoteServiceSection
             lockScreenSection
-            usemanualtempbasalSection
             useVariableBasalSection
             calculateTotalDoseSection
             autoBasalRunningSecion
@@ -368,32 +363,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         .alert(isPresented: $showEmailNotConfiguredWarning, content: { Alert(title: Text("You must  have an email account configured.", comment: "Explain to user that email account must be configured")) })
     }
 
-    var usemanualtempbasalSection: some View {
-        
-        Section(header: SectionHeader(label: LocalizedString("Use manual temp basal in GlucoseEfect", comment: "Section title"))) {
-            
-            Toggle(isOn: $usetempBasalAsIOB) {
-                VStack(alignment: .leading) {
-                    Text("Use manual temp basal", comment: "The title")
-                        .padding(.vertical, 3)
-                }
-            }
-            .onChange(of: usetempBasalAsIOB) { value in
-                UserDefaults.standard.addManualTempBasals = value
-            }
-
-            HStack {
-                Picker("Duration (hours)", selection: $durationAddManualTempBasalsInHours) {
-                    ForEach(Array(stride(from: 1, to: 6, by: 1)), id: \.self) { index in
-                        Text("\(index)")
-                    }
-                }
-                
-            }
-
-        }
-    }
-    
     var autoBasalRunningSecion: some View {
         
         Section(header: SectionHeader(label: LocalizedString("Use auto basal after meal", comment: "Section title"))) {
@@ -439,33 +408,22 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         
         Section(header: SectionHeader(label: LocalizedString("Use variable basal", comment: "Section title"))) {
             
-            if !usetempBasalAsIOB {
-
-                Toggle(isOn: $useVariableBasal) {
-                    VStack(alignment: .leading) {
-                        Text("Use variable basal", comment: "The title")
-                            .padding(.vertical, 3)
-                    }
+            Toggle(isOn: $useVariableBasal) {
+                VStack(alignment: .leading) {
+                    Text("Use variable basal", comment: "The title")
+                        .padding(.vertical, 3)
                 }
-                
-                HStack {
-                    Picker("Percentage", selection: $percentageVariableBasal) {
-                        ForEach(Array(stride(from: 0, to: 101, by: 10)), id: \.self) { index in
-                            Text("\(index)")
-                        }
-                    }
-                    
-                }
-
-            } else {
-                
-                LabeledValueView(
-                    label: LocalizedString("Use variable basal", comment: "Section title"),
-                    value: "Off"
-                )
-                
             }
             
+            HStack {
+                Picker("Percentage", selection: $percentageVariableBasal) {
+                    ForEach(Array(stride(from: 0, to: 101, by: 10)), id: \.self) { index in
+                        Text("\(index)")
+                    }
+                }
+                
+            }
+
         }
     }
     var deletionSection: some View {

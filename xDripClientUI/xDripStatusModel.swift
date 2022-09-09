@@ -47,7 +47,6 @@ class xDripStatusModel: NSObject, ObservableObject {
     
     func notifyDeletion() {
         
-        UserDefaults.standard.addManualTempBasals = true
         UserDefaults.standard.useVariableBasal = false
         
         cgmManager.notifyDelegateOfDeletion {
