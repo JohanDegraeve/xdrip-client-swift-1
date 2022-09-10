@@ -148,7 +148,8 @@ public class xDripCGMManager: NSObject, CGMManager {
             var startDate = Date(timeIntervalSinceNow: -TimeInterval(30*60))
             if let latestReading = latestReading {
                 if startDate.timeIntervalSince(latestReading.startDate) < 30*60 {
-                    startDate = latestReading.startDate
+                    // adding 30 seconds because sometimes latestreading is actually the latest reading from previous time, plus, if libre, possibly some seconds 
+                    startDate = latestReading.startDate.addingTimeInterval(30.0)
                 }
             }
             

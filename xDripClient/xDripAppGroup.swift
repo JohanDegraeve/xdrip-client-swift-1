@@ -113,6 +113,7 @@ public class xDripAppGroup {
                 }
                 
             }
+            
         }
         
         // store latest reading in UserDefaults
