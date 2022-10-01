@@ -78,8 +78,6 @@ fileprivate func calculateTotalInsulin(from: Date, to: Date?, completion: @escap
         let total = results.reduce(0.0, { (base, result) -> Double in
             
             let newresult = result.quantity.doubleValue(for: HKUnit.internationalUnit())
-            //result.
-            print("newresult date = \(result.startDate.description(with:.current)), newresult value = \(newresult.description)")
             
             return base + newresult
                                                         
@@ -385,7 +383,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
 
             HStack {
                 Picker("Multiplier", selection: $autoBasalMultiplier) {
-                    ForEach(Array(stride(from: 0.8, to: 4.0, by: 0.2)), id: \.self) { index in
+                    ForEach(Array(stride(from: 0.8, to: 6.0, by: 0.2)), id: \.self) { index in
                         Text("\(String(format: "%.1f", index))")
                     }
                 }
@@ -394,7 +392,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
 
             HStack {
                 Picker("Duration (hours)", selection: $autoBasalDurationInHours) {
-                    ForEach(Array(stride(from: 1, to: 6, by: 1)), id: \.self) { index in
+                    ForEach(Array(stride(from: 1, to: 10, by: 1)), id: \.self) { index in
                         Text("\(index)")
                     }
                 }
