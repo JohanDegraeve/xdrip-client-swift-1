@@ -114,6 +114,8 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @AppStorage(UserDefaults.Key2.keyForPercentageVariableBasal.rawValue) private var percentageVariableBasal: Int = UserDefaults.standard.percentageVariableBasal
     
+    @AppStorage(UserDefaults.Key2.keyForManualBasalPerHour.rawValue) private var manualBasalPerHour: Double = UserDefaults.standard.manualBasalPerHour
+    
     @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
     
     @AppStorage(UserDefaults.Key2.keyAutoBasalRunning.rawValue) private var autoBasalRunning: Bool = false
@@ -404,7 +406,7 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     var useVariableBasalSection: some View {
         
-        Section(header: SectionHeader(label: LocalizedString("Use variable basal", comment: "Section title"))) {
+        Section(header: SectionHeader(label: LocalizedString("Basal", comment: "Section title"))) {
             
             Toggle(isOn: $useVariableBasal) {
                 VStack(alignment: .leading) {
@@ -422,6 +424,14 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
                 
             }
 
+            HStack {
+                Picker("Manual Basal", selection: $manualBasalPerHour) {
+                    ForEach(Array(stride(from: 0.0, to: 1.0, by: 0.05)), id: \.self) { index in
+                        Text("\(String(format: "%.2f", index))")
+                    }
+                }
+                
+            }
         }
     }
     var deletionSection: some View {
