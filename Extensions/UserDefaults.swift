@@ -46,9 +46,6 @@ extension UserDefaults {
         
         case keyTimeStampEndCalculateTotalDoses = "keyTimeStampEndCalculateTotalDoses"
         
-        /// when giving basal with pens, this represents the amount, per day
-        case keyForManualBasalPerHour = "keyForManualBasalPerHour"
-        
     }
     
     /// will have glucose value for most recent reading, to be used in autobasal
@@ -58,15 +55,6 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key2.keyForLatestGlucoseValue.rawValue)
-        }
-    }
-    
-    public var manualBasalPerHour: Double {
-        get {
-            return double(forKey: Key2.keyForManualBasalPerHour.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key2.keyForManualBasalPerHour.rawValue)
         }
     }
     
