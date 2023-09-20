@@ -15,37 +15,6 @@ import xDripClient
 import CoreBluetooth
 import MessageUI
 
-/// read timeStampStartOfAutoBasal from UserDefaults and return as string
-fileprivate let getTimeStampStartOfAutoBasalDateAsString:() -> String = {
-    
-    let dateFormatter = DateFormatter()
-    dateFormatter.locale = Locale.current
-    dateFormatter.dateStyle = .short
-    dateFormatter.timeStyle = .short
-
-    if let date = UserDefaults.standard.object(forKey: "keyTimeStampStartOfAutoBasal") as? Date {
-        return dateFormatter.string(from: date)
-    } else {
-        return ""
-    }
-}
-
-/// not yet used
-fileprivate let getTimeStampStartOfAddManualTempBasalAsString:() -> String = {
-
-    let dateFormatter = DateFormatter()
-    dateFormatter.locale = Locale.current
-    dateFormatter.dateStyle = .short
-    dateFormatter.timeStyle = .short
-
-    if let date = UserDefaults.standard.object(forKey: "keyTimeStampStartAddManualTempBasals") as? Date {
-        return dateFormatter.string(from: date)
-    } else {
-        return ""
-    }
-
-}
-
 fileprivate let healthKitStore = HKHealthStore()
 
 /// calculates insulin doses from
@@ -116,20 +85,10 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     
     @AppStorage(UserDefaults.Key.heartBeatState.rawValue) private var heartBeatState: String = ""
     
-    @AppStorage(UserDefaults.Key2.keyAutoBasalRunning.rawValue) private var autoBasalRunning: Bool = false
-    
-    @AppStorage(UserDefaults.Key2.keyAutoBasalMultiplier.rawValue) private var autoBasalMultiplier: Double = UserDefaults.standard.autoBasalMultiplier
-    
-    @AppStorage(UserDefaults.Key2.keyForAutoBasalDurationInHours.rawValue) private var autoBasalDurationInHours: Int = UserDefaults.standard.autoBasalDurationInHours
-
     @AppStorage(UserDefaults.Key.shouldSyncToRemoteService.rawValue) private var shouldSyncToRemoteService: Bool = false
 
     /// for some reason the TextEditor that shows the heartBeatState doesn't immediately use multiline. By removing and re-adding it, multiline is used. A trick to force multiline, is to set showHeartBeatText to false as soon as the View is shown, and immediately back to true. Then multiline is used
     @State var showHeartBeatText = true
-    
-    @State var timeStampStartOfAutoBasal = getTimeStampStartOfAutoBasalDateAsString()
-    
-    @State var timeSTampAddManualTempBasal = getTimeStampStartOfAddManualTempBasalAsString()
     
     @State var timeStampStartCalculateTotalDoses: Date = UserDefaults.standard.timeStampStartCalculateTotalDoses
     
@@ -152,7 +111,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
             lockScreenSection
             useVariableBasalSection
             calculateTotalDoseSection
-            autoBasalRunningSecion
             deletionSection
         }
         .insetGroupedListStyle()
@@ -361,47 +319,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         .alert(isPresented: $showEmailNotConfiguredWarning, content: { Alert(title: Text("You must  have an email account configured.", comment: "Explain to user that email account must be configured")) })
     }
 
-    var autoBasalRunningSecion: some View {
-        
-        Section(header: SectionHeader(label: LocalizedString("Use auto basal after meal", comment: "Section title"))) {
-            
-            Toggle(isOn: $autoBasalRunning) {
-                VStack(alignment: .leading) {
-                    Text("Use auto basal", comment: "The title")
-                        .padding(.vertical, 3)
-                }
-            }
-            .onChange(of: autoBasalRunning) { value in
-                UserDefaults.standard.autoBasalRunning = value
-                timeStampStartOfAutoBasal = getTimeStampStartOfAutoBasalDateAsString()
-            }
-            
-            VStack(alignment: .leading) {
-                Text("Last start \(timeStampStartOfAutoBasal)", comment: "The title")
-                    .padding(.vertical, 3)
-            }
-
-            HStack {
-                Picker("Multiplier", selection: $autoBasalMultiplier) {
-                    ForEach(Array(stride(from: 0.8, to: 6.0, by: 0.2)), id: \.self) { index in
-                        Text("\(String(format: "%.1f", index))")
-                    }
-                }
-                
-            }
-
-            HStack {
-                Picker("Duration (hours)", selection: $autoBasalDurationInHours) {
-                    ForEach(Array(stride(from: 1, to: 10, by: 1)), id: \.self) { index in
-                        Text("\(index)")
-                    }
-                }
-                
-            }
-
-        }
-    }
-    
     var useVariableBasalSection: some View {
         
         Section(header: SectionHeader(label: LocalizedString("Basal", comment: "Section title"))) {

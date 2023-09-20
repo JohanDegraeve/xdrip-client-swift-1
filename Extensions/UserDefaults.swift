@@ -21,25 +21,10 @@ extension UserDefaults {
         /// in case keyForUseVariableBasal is true, this is the percentage to be used
         case keyForPercentageVariableBasal = "keyForPercentageVariableBasal"
         
-        /// timestamp start of automatic basal - will be set if keyAutoBasalRunning is set to on
-        case keyTimeStampStartOfAutoBasal = "keyTimeStampStartOfAutoBasal"
-        
-        /// is autobasal running or not
-        case keyAutoBasalRunning = "keyAutoBasalRunning"
-        
-        /// fixed programmed temp basal rate table will be multiplied with this factor
-        case keyAutoBasalMultiplier = "keyAutoBasalMultiplier"
-
-        /// to set autobasal duration, this is actually how long can a meal impact the glucose values (not just the carbs but also the fats and/or protein)
-        case keyForAutoBasalDurationInHours = "keyForAutoBasalDurationInHours"
-
-        /// will have value of trend for the most recent reading, to be used in autobasal
-        case keyForLatestGlucoseTrend = "keyForLatestGlucoseTrend"
-        
-        /// will have glucose value for most recent reading, to be used in autobasal
+        /// will have glucose value for most recent reading, to be used in variable basal
         case keyForLatestGlucoseValue = "keyForLatestGlucoseValue"
         
-        /// will have timestamp for most recent reading, to be used in autobasal
+        /// will have timestamp for most recent reading, to be used in variable basal
         case keyForLatestGlucoseTimeStamp = "keyForLatestGlucoseTimeStamp"
         
         case keyTimeStampStartCalculateTotalDoses = "keyTimeStampStartCalculateTotalDoses"
@@ -48,7 +33,7 @@ extension UserDefaults {
         
     }
     
-    /// will have glucose value for most recent reading, to be used in autobasal
+    /// will have glucose value for most recent reading, to be used in variable basal
     public var latestGlucoseValue: Double {
         get {
             return double(forKey: Key2.keyForLatestGlucoseValue.rawValue)
@@ -93,51 +78,6 @@ extension UserDefaults {
         }
     }
 
-    /// will have value of trend for the latest reading, to be used in autobasal
-    ///      case upUpUp       = 1
-    ///      case upUp         = 2
-    ///      case up           = 3
-    ///      case flat         = 4
-    ///      case down         = 5
-    ///      case downDown     = 6
-    ///      case downDownDown = 7
-    public var latestGlucoseTrend: Int? {
-        get {
-            return integer(forKey: Key2.keyForLatestGlucoseTrend.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key2.keyForLatestGlucoseTrend.rawValue)
-        }
-    }
-    
-    /// timestamp start of automatic basal
-    public var timeStampStartOfAutoBasal:Date? {
-        get {
-            return object(forKey: Key2.keyTimeStampStartOfAutoBasal.rawValue) as? Date
-        }
-        set {
-            set(newValue, forKey: Key2.keyTimeStampStartOfAutoBasal.rawValue)
-        }
-    }
-    
-    /// is autobasal running or not
-    ///
-    /// if set to true, then timeStampStartOfAutoBasal is set to now - if set to false then timeStampStartOfAutoBasal is set to nil
-    public var autoBasalRunning: Bool {
-
-        get {
-            return bool(forKey: Key2.keyAutoBasalRunning.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key2.keyAutoBasalRunning.rawValue)
-            
-            if newValue {
-                timeStampStartOfAutoBasal = Date()
-            }
-            
-        }
-    }
-
     /// should basal be adapted depending on current bg value
     public var useVariableBasal: Bool {
 
@@ -162,36 +102,6 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key2.keyForPercentageVariableBasal.rawValue)
-        }
-    }
-
-    /// in case autoBasalRunning is true, this is the multiplier to be used - value between 1 and 3.9
-    public var autoBasalMultiplier: Double {
-        get {
-            let returnValue = double(forKey: Key2.keyAutoBasalMultiplier.rawValue)
-            // if 0 set to defaultvalue
-            if returnValue == 0 {
-                set(1.0, forKey: Key2.keyAutoBasalMultiplier.rawValue)
-            }
-
-            return returnValue
-        }
-        set {
-            set(newValue, forKey: Key2.keyAutoBasalMultiplier.rawValue)
-        }
-    }
-
-    public var autoBasalDurationInHours: Int {
-        get {
-            let returnValue = integer(forKey: Key2.keyForAutoBasalDurationInHours.rawValue)
-            // if 0 set to default value
-            if returnValue == 0 {
-                set(3, forKey: Key2.keyForAutoBasalDurationInHours.rawValue)
-            }
-            return returnValue
-        }
-        set {
-            set(newValue, forKey: Key2.keyForAutoBasalDurationInHours.rawValue)
         }
     }
     

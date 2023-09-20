@@ -117,8 +117,7 @@ public class xDripAppGroup {
         }
         
         // store latest reading in UserDefaults
-        if let glucoseTrendMostRecentReading = glucoseTrendMostRecentReading, let glucoseValueMostRecentReading = glucoseValueMostRecentReading {
-            UserDefaults.standard.latestGlucoseTrend = glucoseTrendMostRecentReading.rawValue
+        if let glucoseValueMostRecentReading = glucoseValueMostRecentReading {
             UserDefaults.standard.latestGlucoseValue = glucoseValueMostRecentReading.doubleValue(for: .milligramsPerDeciliter)
             UserDefaults.standard.latestGlucoseTimeStamp = timeStampMostRecentReading
         }
