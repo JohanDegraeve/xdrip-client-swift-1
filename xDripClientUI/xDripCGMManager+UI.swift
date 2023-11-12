@@ -14,21 +14,21 @@ import xDripClient
 
 
 extension xDripCGMManager: CGMManagerUI {
-        
+    
     public static var onboardingImage: UIImage? {
         return UIImage(named: "xDrip4iOS")
     }
 
-    public static func setupViewController(bluetoothProvider: BluetoothProvider, displayGlucoseUnitObservable: DisplayGlucoseUnitObservable, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool) -> SetupUIResult<CGMManagerViewController, CGMManagerUI> {
-        return .createdAndOnboarded(xDripCGMManager())
+    public static func setupViewController(bluetoothProvider: BluetoothProvider, displayGlucosePreference: DisplayGlucosePreference, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool, prefersToSkipUserInteraction: Bool) -> SetupUIResult<CGMManagerViewController, CGMManagerUI> {
+        return .userInteractionRequired(UICoordinator(cgmManager: xDripCGMManager(), displayGlucosePreference: displayGlucosePreference, colorPalette: colorPalette))
     }
     
     public var smallImage: UIImage? {
         return UIImage(named: "xDrip4iOS")
     }
     
-    public func settingsViewController(bluetoothProvider: BluetoothProvider, displayGlucoseUnitObservable: DisplayGlucoseUnitObservable, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool) -> CGMManagerViewController {
-        return UICoordinator(cgmManager: self, glucoseUnitObservable: displayGlucoseUnitObservable, colorPalette: colorPalette)
+    public func settingsViewController(bluetoothProvider: BluetoothProvider, displayGlucosePreference: DisplayGlucosePreference, colorPalette: LoopUIColorPalette, allowDebugFeatures: Bool) -> CGMManagerViewController {
+        return UICoordinator(cgmManager: self, displayGlucosePreference: displayGlucosePreference, colorPalette: colorPalette)
     }
     
     public var cgmStatusHighlight: DeviceStatusHighlight? {

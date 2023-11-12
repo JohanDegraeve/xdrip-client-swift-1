@@ -42,7 +42,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
     var body: some View {
         List {
             overviewSection
-            latestReadingSection
             heartBeatSection
             shouldSyncToRemoteServiceSection
             lockScreenSection
@@ -90,26 +89,6 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
                 .foregroundColor(.blue)
         }
         .contentShape(Rectangle())
-    }
-    
-    var latestReadingSection: some View {
-        Section(header: SectionHeader(label: LocalizedString("Latest Reading", comment: "Section title for latest glucose reading"))) {
-            LabeledGlucoseView(
-                label: LocalizedString("Glucose", comment: "Title describing glucose reading"),
-                glucose: viewModel.latestReading?.quantity,
-                preferredUnit: viewModel.preferredUnit,
-                unitFormatter: viewModel.unitFormatter
-            )
-            LabeledDateView(
-                label: LocalizedString("Date", comment: "Title describing reading date"),
-                date: viewModel.latestReading?.startDate,
-                dateFormatter: viewModel.dateFormatter
-            )
-            LabeledValueView(
-                label: LocalizedString("Trend", comment: "Title describing glucose trend"),
-                value: viewModel.latestReading?.trendType?.localizedDescription
-            )
-        }
     }
     
     var heartBeatSection: some View {
@@ -221,21 +200,4 @@ struct xDripStatusView<Model>: View where Model: xDripStatusModel {
         Button(action: { viewModel.hasCompleted?() }) { Text("Done").bold() }
     }
         
-}
-
-struct LabeledGlucoseView: View {
-    
-    var label: String
-    var glucose: HKQuantity?
-    var preferredUnit: HKUnit
-    var unitFormatter: QuantityFormatter
-        
-    private var glucoseString: String? {
-        guard let glucose = self.glucose else { return nil }
-        return unitFormatter.string(from: glucose, for: preferredUnit)
-    }
-    
-    var body: some View {
-        LabeledValueView(label: label, value: glucoseString)
-    }
 }

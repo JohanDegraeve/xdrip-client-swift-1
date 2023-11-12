@@ -15,7 +15,7 @@ import Foundation
 
 public class xDripCGMManager: NSObject, CGMManager {
     
-    public var managerIdentifier: String = "xDripClient"
+    public static var pluginIdentifier: String = "xDripClient"
     
     public var localizedTitle: String = "xDrip4iOS"
     
@@ -24,7 +24,7 @@ public class xDripCGMManager: NSObject, CGMManager {
             return UserDefaults.standard.useCGMAsHeartbeat
         }
     }
-
+    
     public var isOnboarded: Bool = true // No distinction between created and onboarded
     
     public var shouldSyncToRemoteService: Bool {
