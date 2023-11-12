@@ -2,7 +2,7 @@ This is a https://github.com/loopkit/loop plugin to connect https://github.com/J
 
 ## functionality
 
-- uses xDrip4iOS as a CGM : readings are fechted from UserDefaults, where they are stored by xDrip4iOS.
+- uses xDrip4iOS as a CGM : readings are fetched from UserDefaults, where they are stored by xDrip4iOS.
 - can use the CGM as heartbeat (optional) : if enabled, then it will make a connection to the CGM (in parallel to xDrip4iOS) just for the sake of keeping Loop alive. Can be used with Libre or Dexcom. In case of Libre, the reading will run 1 minute behind.
   - If you haven't setup your CGM yet in xDrip4iOS : 
       - Force close Loop
